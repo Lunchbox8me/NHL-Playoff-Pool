@@ -50,7 +50,7 @@ const HockeyIcon = ({ name, className = "" }) => {
   if (name === 'Calendar') return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
   if (name === 'Medal') return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}><path d="M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15"/><path d="M11 12 5.12 2.2"/><path d="m13 12 5.88-9.8"/><path d="M8 7h8"/><circle cx="12" cy="17" r="5"/><polyline points="12 18 13 16 14 17"/></svg>;
   if (name === 'LayoutDashboard') return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>;
-  if (name === 'Settings') return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
+  if (name === 'Settings') return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
   if (name === 'Plus') return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
   if (name === 'Trash2') return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>;
   if (name === 'Loader2') return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>;
@@ -178,12 +178,15 @@ function App() {
   const [aiAnalysis, setAiAnalysis] = useState({});
   const [trashTalk, setTrashTalk] = useState({});
   
-  // Chat State
+  // Chat & Admin State
   const [chatMessages, setChatMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [showGifs, setShowGifs] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [updateNameInput, setUpdateNameInput] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminPasswordInput, setAdminPasswordInput] = useState('');
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   
   const chatEndRef = useRef(null);
   const prevMessagesLength = useRef(0);
@@ -451,9 +454,9 @@ function App() {
   };
 
   const handleRemoveParticipant = async (id) => {
-    if(window.confirm("Remove participant?")) {
-      try { await deleteDoc(doc(poolDb, 'artifacts', poolId, 'public', 'data', 'participants', id)); } catch (err) { console.error(err); }
-    }
+    try { 
+      await deleteDoc(doc(poolDb, 'artifacts', poolId, 'public', 'data', 'participants', id)); 
+    } catch (err) { console.error(err); }
   };
 
   const handleCopyLink = () => {
@@ -536,7 +539,7 @@ function App() {
           <NavItem id="chat" icon={<HockeyIcon name="MessageSquare"/>} label="Locker Room" activeTab={activeTab} setActiveTab={setActiveTab} />
           <NavItem id="live" icon={<HockeyIcon name="Activity"/>} label="Live Action" activeTab={activeTab} setActiveTab={setActiveTab} />
           <div className="md:mt-auto hidden md:block border-t border-slate-800 pt-4" />
-          <NavItem id="manage" icon={<HockeyIcon name="Settings"/>} label="Manage Pool" activeTab={activeTab} setActiveTab={setActiveTab} />
+          <NavItem id="manage" icon={<HockeyIcon name="Settings"/>} label="Settings" activeTab={activeTab} setActiveTab={setActiveTab} />
         </div>
       </nav>
 
@@ -730,33 +733,83 @@ function App() {
 
         {activeTab === 'manage' && (
           <div className="space-y-6 animate-in fade-in duration-300">
-            <h2 className="text-3xl font-bold">Manage Pool</h2>
+            <h2 className="text-3xl font-bold">Settings</h2>
 
+            {/* Always visible to the user: Change Name */}
             <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg">
               <h3 className="font-bold mb-4 flex items-center gap-2 text-slate-200"><HockeyIcon name="Edit3" className="text-blue-400"/> Change My Name</h3>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <input type="text" placeholder="Update your name..." value={updateNameInput} onChange={(e) => setUpdateNameInput(e.target.value)} className="bg-slate-950 flex-1 p-3 rounded-lg outline-none border border-slate-800 focus:border-blue-500 transition-colors text-white"/>
-                <button onClick={() => { if(updateNameInput.trim()) { handleUpdateParticipant(myParticipantId, 'name', updateNameInput.trim()); setSaveSuccess(true); setTimeout(() => setSaveSuccess(false), 3000); } }} className="bg-blue-600 px-6 font-bold rounded-lg hover:bg-blue-500 transition-colors active:scale-95 shadow-lg flex items-center gap-2">{saveSuccess ? <HockeyIcon name="CheckCircle2"/> : 'Save'}</button>
+                <button onClick={() => { if(updateNameInput.trim()) { handleUpdateParticipant(myParticipantId, 'name', updateNameInput.trim()); setSaveSuccess(true); setTimeout(() => setSaveSuccess(false), 3000); } }} className="bg-blue-600 px-6 py-3 sm:py-0 font-bold rounded-lg hover:bg-blue-500 transition-colors active:scale-95 shadow-lg flex justify-center items-center gap-2">{saveSuccess ? <HockeyIcon name="CheckCircle2"/> : 'Save'}</button>
               </div>
             </div>
 
-            <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg">
-              <h3 className="font-bold mb-4 flex items-center gap-2 text-slate-200"><HockeyIcon name="Users" className="text-blue-400"/> Add Participant (Manual Entry)</h3>
-              <div className="flex gap-2">
-                <input type="text" placeholder="Enter name..." value={newParticipantName} onChange={(e) => setNewParticipantName(e.target.value)} className="bg-slate-950 flex-1 p-3 rounded-lg outline-none border border-slate-800 focus:border-blue-500 transition-colors text-white"/>
-                <button onClick={handleAddParticipant} className="bg-blue-600 px-6 font-bold rounded-lg hover:bg-blue-500 transition-colors active:scale-95 shadow-lg">Add</button>
-              </div>
+            {/* Admin Zone Lock/Unlock */}
+            <div className="pt-4 border-t border-slate-800/80">
+              {!isAdmin ? (
+                <div className="bg-slate-800/30 p-6 rounded-2xl border border-slate-700/50 flex flex-col sm:flex-row gap-4 items-center justify-between">
+                  <div>
+                    <h3 className="font-bold text-slate-300 flex items-center gap-2"><HockeyIcon name="Settings" className="text-slate-500"/> Admin Access</h3>
+                    <p className="text-xs text-slate-500 mt-1">Enter PIN to manage participants and pool points.</p>
+                  </div>
+                  <div className="flex gap-2 w-full sm:w-auto">
+                    <input 
+                      type="password" 
+                      placeholder="Admin PIN" 
+                      value={adminPasswordInput} 
+                      onChange={(e) => setAdminPasswordInput(e.target.value)} 
+                      onKeyDown={(e) => { if(e.key === 'Enter' && adminPasswordInput === 'admin') { setIsAdmin(true); setAdminPasswordInput(''); } }}
+                      className="bg-slate-950 p-2.5 rounded-lg border border-slate-700 text-white outline-none focus:border-amber-500 w-full sm:w-32" 
+                    />
+                    <button onClick={() => { if(adminPasswordInput === 'admin') { setIsAdmin(true); setAdminPasswordInput(''); } }} className="bg-slate-700 hover:bg-slate-600 px-4 py-2.5 rounded-lg font-bold transition-colors text-sm">Unlock</button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                  <div className="flex justify-between items-center bg-amber-500/10 border border-amber-500/20 p-4 rounded-xl">
+                    <h3 className="text-lg font-bold text-amber-500 flex items-center gap-2"><HockeyIcon name="AlertCircle" /> Admin Zone Unlocked</h3>
+                    <button onClick={() => setIsAdmin(false)} className="text-xs bg-slate-800 px-4 py-2 rounded-lg hover:bg-slate-700 text-slate-300 font-bold transition-colors">Lock Zone</button>
+                  </div>
+
+                  <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg">
+                    <h3 className="font-bold mb-4 flex items-center gap-2 text-slate-200"><HockeyIcon name="Users" className="text-blue-400"/> Add Participant (Manual Entry)</h3>
+                    <div className="flex gap-2">
+                      <input type="text" placeholder="Enter name..." value={newParticipantName} onChange={(e) => setNewParticipantName(e.target.value)} className="bg-slate-950 flex-1 p-3 rounded-lg outline-none border border-slate-800 focus:border-blue-500 transition-colors text-white"/>
+                      <button onClick={handleAddParticipant} className="bg-blue-600 px-6 font-bold rounded-lg hover:bg-blue-500 transition-colors active:scale-95 shadow-lg">Add</button>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-slate-800 rounded-2xl border border-slate-700 overflow-x-auto shadow-xl">
+                    <table className="w-full text-left min-w-[600px] border-collapse"><tbody className="divide-y divide-slate-700">
+                      {participants.map(p => (
+                        <tr key={p.id} className="hover:bg-slate-700/20 transition-colors">
+                          <td className="p-4 font-bold text-slate-200">{p.name}</td>
+                          <td className="p-4">
+                            <div className="flex items-center gap-2 text-xs text-slate-500 font-bold uppercase tracking-tight">Pts: 
+                              <input type="number" value={p.points} onChange={(e) => handleUpdateParticipant(p.id, 'points', e.target.value)} className="bg-slate-950 p-2 rounded w-20 text-center border border-slate-800 text-slate-100 font-black focus:border-blue-500 outline-none"/>
+                            </div>
+                          </td>
+                          <td className="p-4 text-right">
+                            {deleteConfirmId === p.id ? (
+                              <div className="flex justify-end gap-2">
+                                <button onClick={() => setDeleteConfirmId(null)} className="text-xs text-slate-400 hover:text-white px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 font-bold">Cancel</button>
+                                <button onClick={() => { handleRemoveParticipant(p.id); setDeleteConfirmId(null); }} className="text-xs text-white bg-red-600 px-3 py-1.5 rounded-lg hover:bg-red-500 font-bold">Confirm</button>
+                              </div>
+                            ) : (
+                              <button onClick={() => setDeleteConfirmId(p.id)} className="text-slate-500 hover:text-red-500 transition-all p-2 rounded-lg hover:bg-red-500/10"><HockeyIcon name="Trash2"/></button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                      {participants.length === 0 && (
+                        <tr><td colSpan="3" className="p-12 text-center text-slate-500 italic font-medium">No participants found in database. Share your link to start!</td></tr>
+                      )}
+                    </tbody></table>
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="bg-slate-800 rounded-2xl border border-slate-700 overflow-x-auto shadow-xl">
-              <table className="w-full text-left min-w-[600px] border-collapse"><tbody className="divide-y divide-slate-700">
-                {participants.map(p => (
-                  <tr key={p.id} className="hover:bg-slate-700/20 transition-colors"><td className="p-4 font-bold text-slate-200">{p.name}</td><td className="p-4"><div className="flex items-center gap-2 text-xs text-slate-500 font-bold uppercase tracking-tight">Pts: <input type="number" value={p.points} onChange={(e) => handleUpdateParticipant(p.id, 'points', e.target.value)} className="bg-slate-950 p-2 rounded w-20 text-center border border-slate-800 text-slate-100 font-black focus:border-blue-500 outline-none"/></div></td><td className="p-4 text-right"><button onClick={() => handleRemoveParticipant(p.id)} className="text-slate-500 hover:text-red-500 transition-all p-2 rounded-lg hover:bg-red-500/10"><HockeyIcon name="Trash2"/></button></td></tr>
-                ))}
-                {participants.length === 0 && (
-                  <tr><td colSpan="3" className="p-12 text-center text-slate-500 italic font-medium">No participants found in database. Share your link to start!</td></tr>
-                )}
-              </tbody></table>
-            </div>
+
           </div>
         )}
       </main>
