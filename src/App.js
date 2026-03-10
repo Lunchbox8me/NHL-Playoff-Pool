@@ -183,6 +183,7 @@ function App() {
   const [newMessage, setNewMessage] = useState('');
   const [showGifs, setShowGifs] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [updateNameInput, setUpdateNameInput] = useState('');
   
   const chatEndRef = useRef(null);
   const prevMessagesLength = useRef(0);
@@ -297,6 +298,14 @@ function App() {
       chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [chatMessages, activeTab]);
+
+  // Pre-fill update name input
+  useEffect(() => {
+    const me = participants.find(p => p.id === myParticipantId);
+    if (me && !updateNameInput) {
+      setUpdateNameInput(me.name);
+    }
+  }, [participants, myParticipantId]);
 
   useEffect(() => {
     let isMounted = true;
@@ -510,6 +519,7 @@ function App() {
         <form onSubmit={handleJoinPool} className="flex flex-col gap-4 mt-6">
           <input type="text" placeholder="Display Name" value={newParticipantName} onChange={(e) => setNewParticipantName(e.target.value)} className="bg-slate-950 border border-slate-700 text-white rounded-xl px-4 py-3 text-center outline-none focus:border-blue-500"/>
           <button type="submit" className="bg-blue-600 text-white px-6 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-transform active:scale-95"><HockeyIcon name="LogIn" /> Join Pool</button>
+          <p className="text-slate-400 text-xs italic mt-2">You can always change your display name later.</p>
         </form>
       </div>
     </div>
@@ -721,6 +731,15 @@ function App() {
         {activeTab === 'manage' && (
           <div className="space-y-6 animate-in fade-in duration-300">
             <h2 className="text-3xl font-bold">Manage Pool</h2>
+
+            <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg">
+              <h3 className="font-bold mb-4 flex items-center gap-2 text-slate-200"><HockeyIcon name="Edit3" className="text-blue-400"/> Change My Name</h3>
+              <div className="flex gap-2">
+                <input type="text" placeholder="Update your name..." value={updateNameInput} onChange={(e) => setUpdateNameInput(e.target.value)} className="bg-slate-950 flex-1 p-3 rounded-lg outline-none border border-slate-800 focus:border-blue-500 transition-colors text-white"/>
+                <button onClick={() => { if(updateNameInput.trim()) { handleUpdateParticipant(myParticipantId, 'name', updateNameInput.trim()); setSaveSuccess(true); setTimeout(() => setSaveSuccess(false), 3000); } }} className="bg-blue-600 px-6 font-bold rounded-lg hover:bg-blue-500 transition-colors active:scale-95 shadow-lg flex items-center gap-2">{saveSuccess ? <HockeyIcon name="CheckCircle2"/> : 'Save'}</button>
+              </div>
+            </div>
+
             <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg">
               <h3 className="font-bold mb-4 flex items-center gap-2 text-slate-200"><HockeyIcon name="Users" className="text-blue-400"/> Add Participant (Manual Entry)</h3>
               <div className="flex gap-2">
