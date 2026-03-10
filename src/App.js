@@ -58,6 +58,8 @@ const HockeyIcon = ({ name, className = "" }) => {
   if (name === 'Share2') return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>;
   if (name === 'Sparkles') return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>;
   if (name === 'MessageSquare') return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>;
+  if (name === 'Bell') return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>;
+  if (name === 'BellOff') return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}><path d="M13.73 21a2 2 0 0 1-3.46 0"/><path d="M18.63 13A17.89 17.89 0 0 1 18 8"/><path d="M6.26 6.26A5.86 5.86 0 0 0 6 8c0 7-3 9-3 9h14"/><path d="M18 8a6 6 0 0 0-9.33-5"/><line x1="1" y1="1" x2="23" y2="23"/></svg>;
   
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}></svg>;
 };
@@ -180,7 +182,10 @@ function App() {
   const [chatMessages, setChatMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [showGifs, setShowGifs] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  
   const chatEndRef = useRef(null);
+  const prevMessagesLength = useRef(0);
 
   const sortedParticipants = [...participants].sort((a, b) => (b.points || 0) - (a.points || 0));
 
@@ -201,6 +206,13 @@ function App() {
       setLoadingAuth(false);
     });
     return () => unsubscribe();
+  }, []);
+
+  // Initialize notification state based on browser permission
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      setNotificationsEnabled(true);
+    }
   }, []);
 
   // Fetch Participants
@@ -250,6 +262,34 @@ function App() {
     }, (err) => console.error(err));
     return () => unsubscribe();
   }, [user, hasJoined]);
+
+  // Watch for new messages and trigger notification
+  useEffect(() => {
+    if (chatMessages.length > prevMessagesLength.current) {
+      // Only notify if it's NOT the very first initial load (when prev length is 0)
+      if (prevMessagesLength.current > 0 && notificationsEnabled) {
+        const newMsgs = chatMessages.slice(prevMessagesLength.current);
+        newMsgs.forEach(msg => {
+          // Don't notify if I sent it myself
+          if (msg.uid !== user?.uid) {
+            // Check if the app is in the background or they are on a different tab inside the app
+            if (activeTab !== 'chat' || document.hidden) {
+              if ('Notification' in window && Notification.permission === 'granted') {
+                try {
+                  new Notification(`IcePool: ${msg.senderName}`, {
+                    body: msg.text.includes('http') ? '🏒 Sent a GIF/Image' : msg.text,
+                  });
+                } catch (e) {
+                  console.error("Notification failed", e);
+                }
+              }
+            }
+          }
+        });
+      }
+      prevMessagesLength.current = chatMessages.length;
+    }
+  }, [chatMessages, notificationsEnabled, user, activeTab]);
 
   // Auto-scroll chat to bottom
   useEffect(() => {
@@ -325,6 +365,28 @@ function App() {
       });
       setNewParticipantName('');
     } catch (err) { console.error(err); }
+  };
+
+  const toggleNotifications = async () => {
+    if (!('Notification' in window)) {
+      alert("This browser does not support desktop/mobile notifications.");
+      return;
+    }
+    
+    if (notificationsEnabled) {
+      setNotificationsEnabled(false);
+    } else {
+      if (Notification.permission === 'granted') {
+        setNotificationsEnabled(true);
+      } else if (Notification.permission !== 'denied') {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          setNotificationsEnabled(true);
+        }
+      } else {
+         alert("You have previously blocked notifications for this site. Please enable them in your browser settings.");
+      }
+    }
   };
 
   const handleSendMessage = async (e) => {
@@ -506,8 +568,15 @@ function App() {
 
         {activeTab === 'chat' && (
           <div className="space-y-4 animate-in fade-in duration-300 flex flex-col h-[calc(100vh-8rem)] md:h-[calc(100vh-4rem)]">
-            <h2 className="text-3xl font-bold">Locker Room</h2>
-            <div className="flex-1 bg-slate-900 border border-slate-700 rounded-2xl flex flex-col overflow-hidden shadow-xl">
+            <div className="flex justify-between items-end">
+              <h2 className="text-3xl font-bold">Locker Room</h2>
+              <button onClick={toggleNotifications} className={`flex items-center gap-2 px-3 py-2 rounded-lg font-bold text-xs transition-colors border ${notificationsEnabled ? 'bg-blue-900/30 text-blue-400 border-blue-500/30 shadow-inner' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200 hover:bg-slate-700 shadow-sm'}`}>
+                <HockeyIcon name={notificationsEnabled ? 'Bell' : 'BellOff'} className="w-4 h-4" />
+                <span className="hidden sm:inline">{notificationsEnabled ? 'Notifs On' : 'Turn On Notifs'}</span>
+              </button>
+            </div>
+            
+            <div className="flex-1 bg-slate-900 border border-slate-700 rounded-2xl flex flex-col overflow-hidden shadow-xl relative">
               
               {/* Messages Area */}
               <div className="flex-1 p-4 overflow-y-auto space-y-4">
