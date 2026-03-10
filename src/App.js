@@ -237,9 +237,9 @@ function App() {
     return () => unsubscribe();
   }, []);
 
-  // Initialize notification state based on browser permission
+  // Initialize notification state safely
   useEffect(() => {
-    if ('Notification' in window && Notification.permission === 'granted') {
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
       setNotificationsEnabled(true);
     }
   }, []);
@@ -266,7 +266,9 @@ function App() {
         setHasJoined(true);
         setMyParticipantId(me.id);
         if (!picksLoaded) {
-          setMyPicks({ cupWinner: me.cupPick || '', series: me.picks || DEFAULT_PICKS });
+          // Merge initial default picks with loaded picks to ensure all keys exist
+          const mergedSeries = { ...DEFAULT_PICKS, ...(me.picks || {}) };
+          setMyPicks({ cupWinner: me.cupPick || '', series: mergedSeries });
           setPicksLoaded(true);
         }
       } else {
@@ -299,10 +301,11 @@ function App() {
         const newMsgs = chatMessages.slice(prevMessagesLength.current);
         newMsgs.forEach(msg => {
           if (msg.uid !== user?.uid) {
-            if (activeTab !== 'chat' || document.hidden) {
-              if ('Notification' in window && Notification.permission === 'granted') {
+            if (activeTab !== 'chat' || (typeof document !== 'undefined' && document.hidden)) {
+              if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
                 try {
                   new Notification(`IcePool: ${msg.senderName}`, {
+                    theme: 'dark',
                     body: msg.text.includes('http') ? '🏒 Sent a GIF/Image' : msg.text,
                   });
                 } catch (e) {
@@ -330,7 +333,7 @@ function App() {
     if (me && !updateNameInput) {
       setUpdateNameInput(me.name);
     }
-  }, [participants, myParticipantId]);
+  }, [participants, myParticipantId, updateNameInput]);
 
   useEffect(() => {
     let isMounted = true;
@@ -358,17 +361,19 @@ function App() {
 
   const handleSeriesPick = (matchupId, field, value) => {
     setMyPicks(prev => {
-      const updatedSeries = { ...prev.series, [matchupId]: { ...prev.series[matchupId], [field]: value } };
+      // Ensure the series item exists
+      const currentItem = prev.series[matchupId] || { winner: '', p1: '', p2: '' };
+      const updatedSeries = { ...prev.series, [matchupId]: { ...currentItem, [field]: value } };
       
-      // If we just picked a winner in Round 1, suggest it for the Round 2 slot
+      // Suggesting winner logic for Round 1 to Round 2
       if (field === 'winner') {
         const r1Match = ROUND_MATCHUPS.r1.find(m => m.id === matchupId);
         if (r1Match) {
-          // Identify which Round 2 matchup and slot this feeds into
           const r2Target = ROUND_MATCHUPS.r2.find(m => m.poolT1.includes(r1Match.t1) || m.poolT2.includes(r1Match.t1));
           if (r2Target) {
             const slot = r2Target.poolT1.includes(r1Match.t1) ? 'p1' : 'p2';
-            updatedSeries[r2Target.id] = { ...updatedSeries[r2Target.id], [slot]: value };
+            const r2Item = updatedSeries[r2Target.id] || { winner: '', p1: '', p2: '' };
+            updatedSeries[r2Target.id] = { ...r2Item, [slot]: value };
           }
         }
       }
@@ -419,8 +424,7 @@ function App() {
   };
 
   const toggleNotifications = async () => {
-    if (!('Notification' in window)) {
-      alert("This browser does not support desktop/mobile notifications.");
+    if (typeof window === 'undefined' || !('Notification' in window)) {
       return;
     }
     
@@ -434,8 +438,6 @@ function App() {
         if (permission === 'granted') {
           setNotificationsEnabled(true);
         }
-      } else {
-         alert("You have previously blocked notifications for this site. Please enable them in your browser settings.");
       }
     }
   };
@@ -582,7 +584,7 @@ function App() {
         </div>
       </nav>
 
-      <main className="flex-1 p-4 md:p-8 pb-24 max-w-full overflow-x-hidden mx-auto w-full">
+      <main className="flex-1 p-4 md:p-8 pb-24 w-full overflow-y-auto">
         {activeTab === 'dashboard' && (
           <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in duration-300">
             <div className="flex flex-col sm:flex-row justify-between items-end gap-4">
@@ -671,161 +673,163 @@ function App() {
         )}
 
         {activeTab === 'mypicks' && (
-          <div className="space-y-6 animate-in fade-in duration-300 pb-12">
+          <div className="space-y-6 animate-in fade-in duration-300 pb-12 w-full">
             <div className="max-w-6xl mx-auto flex justify-between items-end px-2">
               <div>
-                <h2 className="text-3xl font-bold">Playoff Bracket</h2>
-                <p className="text-slate-500 text-xs mt-1">Pick your winners for every round independently.</p>
+                <h2 className="text-3xl font-bold tracking-tight">Playoff Bracket</h2>
+                <p className="text-slate-500 text-xs mt-1">Scroll right to see future rounds.</p>
               </div>
-              <button onClick={handleSavePicks} className="bg-blue-600 px-6 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-transform active:scale-95 shadow-lg shadow-blue-600/20">{saveSuccess ? <HockeyIcon name="CheckCircle2"/> : 'Save All Picks'}</button>
+              <button onClick={handleSavePicks} className="bg-blue-600 px-6 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-transform active:scale-95 shadow-lg shadow-blue-600/20">{saveSuccess ? <HockeyIcon name="CheckCircle2"/> : 'Save All'}</button>
             </div>
 
-            {/* Bracket Scroll Area */}
-            <div className="w-full overflow-x-auto no-scrollbar pt-4 flex gap-4 md:gap-12 min-w-max pb-8 px-4">
-              
-              {/* ROUND 1 */}
-              <div className="flex flex-col gap-8 w-56 md:w-64">
-                <div className="text-center font-black text-[10px] text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2">Round 1</div>
-                {ROUND_MATCHUPS.r1.map(m => (
-                  <div key={m.id} className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-slate-700">
-                    <div className="bg-slate-800/50 p-2 border-b border-slate-800 flex justify-between items-center text-[10px] font-bold text-slate-500">
-                      <span>{m.region}</span>
-                      <button onClick={() => handleGenerateAnalysis(m.id, m.t1, m.t2)} className="text-amber-500 uppercase text-[9px] hover:text-amber-400">✨ AI Analysis</button>
-                    </div>
-                    {['t1', 't2'].map(key => {
-                      const team = m[key];
-                      const isWinner = myPicks.series[m.id].winner === team;
-                      return (
-                        <button key={team} onClick={() => handleSeriesPick(m.id, 'winner', team)} className={`w-full flex items-center gap-3 p-3 transition-all ${isWinner ? 'bg-blue-600/20 text-white' : 'hover:bg-slate-800 text-slate-400'}`}>
-                          <img src={getLogo(team)} className="w-6 h-6" alt=""/>
-                          <span className={`text-sm font-bold ${isWinner ? 'text-blue-400' : ''}`}>{team}</span>
-                          {isWinner && <HockeyIcon name="CheckCircle2" className="ml-auto w-4 h-4 text-blue-400" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                ))}
-              </div>
-
-              {/* ROUND 2 */}
-              <div className="flex flex-col gap-8 w-56 md:w-64 justify-around">
-                <div className="text-center font-black text-[10px] text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2">Conf Semis</div>
-                {ROUND_MATCHUPS.r2.map(m => (
-                  <div key={m.id} className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-blue-900/50">
-                    <div className="bg-slate-800/50 p-2 border-b border-slate-800 text-[10px] font-bold text-slate-500">{m.region} Semis</div>
-                    {['p1', 'p2'].map((field, idx) => {
-                      const pool = idx === 0 ? m.poolT1 : m.poolT2;
-                      const selected = myPicks.series[m.id][field];
-                      const isWinner = myPicks.series[m.id].winner === selected && selected !== '';
-                      return (
-                        <div key={field} className="flex items-center gap-1 p-1 bg-slate-950/20">
-                          <select 
-                            value={selected} 
-                            onChange={(e) => handleSeriesPick(m.id, field, e.target.value)} 
-                            className="flex-1 bg-slate-900 text-xs font-bold p-2 text-slate-300 rounded outline-none border border-slate-800 focus:border-blue-500"
-                          >
-                            <option value="">Select Team...</option>
-                            {pool.map(t => <option key={t} value={t}>{t}</option>)}
-                          </select>
-                          <button 
-                            disabled={!selected}
-                            onClick={() => handleSeriesPick(m.id, 'winner', selected)}
-                            className={`p-2 rounded transition-all ${isWinner ? 'text-blue-400' : 'text-slate-700 hover:text-slate-500'}`}
-                          >
-                            <HockeyIcon name="CheckCircle2" className="w-5 h-5" />
-                          </button>
-                        </div>
-                      )
-                    })}
-                  </div>
-                ))}
-              </div>
-
-              {/* ROUND 3 */}
-              <div className="flex flex-col gap-8 w-56 md:w-64 justify-around">
-                <div className="text-center font-black text-[10px] text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2">Conf Finals</div>
-                {ROUND_MATCHUPS.r3.map(m => (
-                  <div key={m.id} className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-blue-700">
-                    <div className="bg-slate-800/50 p-2 border-b border-slate-800 text-[10px] font-bold text-slate-500">{m.region} Finals</div>
-                    {['p1', 'p2'].map((field, idx) => {
-                      const pool = idx === 0 ? m.poolT1 : m.poolT2;
-                      const selected = myPicks.series[m.id][field];
-                      const isWinner = myPicks.series[m.id].winner === selected && selected !== '';
-                      return (
-                        <div key={field} className="flex items-center gap-1 p-2 bg-slate-950/20">
-                          <select 
-                            value={selected} 
-                            onChange={(e) => handleSeriesPick(m.id, field, e.target.value)} 
-                            className="flex-1 bg-slate-900 text-xs font-bold p-2.5 text-slate-300 rounded outline-none border border-slate-800 focus:border-blue-500"
-                          >
-                            <option value="">Select Team...</option>
-                            {pool.map(t => <option key={t} value={t}>{t}</option>)}
-                          </select>
-                          <button 
-                            disabled={!selected}
-                            onClick={() => handleSeriesPick(m.id, 'winner', selected)}
-                            className={`p-2 rounded transition-all ${isWinner ? 'text-blue-400' : 'text-slate-700 hover:text-slate-500'}`}
-                          >
-                            <HockeyIcon name="CheckCircle2" className="w-6 h-6" />
-                          </button>
-                        </div>
-                      )
-                    })}
-                  </div>
-                ))}
-              </div>
-
-              {/* CUP FINAL */}
-              <div className="flex flex-col w-64 md:w-80 justify-center">
-                <div className="text-center font-black text-[10px] text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2 mb-4">Stanley Cup Final</div>
-                {ROUND_MATCHUPS.r4.map(m => {
-                  const winner = myPicks.series[m.id].winner;
-                  return (
-                    <div key={m.id} className="space-y-4">
-                      <div className="bg-slate-900 border border-blue-600/30 rounded-2xl overflow-hidden shadow-2xl relative">
-                        <div className="bg-slate-800/80 p-3 flex justify-center"><HockeyIcon name="Trophy" className="text-yellow-500 w-10 h-10 animate-pulse"/></div>
-                        {['p1', 'p2'].map((field, idx) => {
-                          const pool = idx === 0 ? m.poolT1 : m.poolT2;
-                          const selected = myPicks.series[m.id][field];
-                          const isWinner = winner === selected && selected !== '';
-                          return (
-                            <div key={field} className="flex items-center gap-3 p-4 bg-slate-950/10 border-b border-slate-800 last:border-0">
-                               <select 
-                                value={selected} 
-                                onChange={(e) => handleSeriesPick(m.id, field, e.target.value)} 
-                                className="flex-1 bg-slate-950 text-base font-black p-3 text-white rounded-lg border border-slate-700 focus:border-yellow-500 outline-none"
-                              >
-                                <option value="">Select Champion...</option>
-                                {pool.map(t => <option key={t} value={t}>{t}</option>)}
-                              </select>
-                              <button 
-                                disabled={!selected}
-                                onClick={() => { 
-                                  handleSeriesPick(m.id, 'winner', selected);
-                                  setMyPicks(prev => ({ ...prev, cupWinner: selected }));
-                                }}
-                                className={`p-3 rounded-full transition-all ${isWinner ? 'bg-yellow-500 text-slate-900' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
-                              >
-                                <HockeyIcon name="Trophy" className="w-6 h-6" />
-                              </button>
-                            </div>
-                          )
-                        })}
+            {/* Optimized Bracket Scroll Area */}
+            <div className="w-full overflow-x-auto overflow-y-visible pb-12 pt-4 px-4 scroll-smooth">
+              <div className="flex gap-8 md:gap-12 min-w-max">
+                
+                {/* ROUND 1 */}
+                <div className="flex flex-col gap-8 w-56 md:w-64 shrink-0">
+                  <div className="text-center font-black text-[10px] text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2">Round 1</div>
+                  {ROUND_MATCHUPS.r1.map(m => (
+                    <div key={m.id} className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-slate-700">
+                      <div className="bg-slate-800/50 p-2 border-b border-slate-800 flex justify-between items-center text-[10px] font-bold text-slate-500">
+                        <span>{m.region}</span>
+                        <button onClick={() => handleGenerateAnalysis(m.id, m.t1, m.t2)} className="text-amber-500 uppercase text-[9px] hover:text-amber-400 font-black">✨ AI Analyst</button>
                       </div>
-                      
-                      {winner && (
-                        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-5 text-center animate-in zoom-in duration-500">
-                          <div className="text-[10px] font-black text-yellow-500 uppercase mb-1">Your Predicted 2026 Champion</div>
-                          <div className="text-3xl font-black text-white flex items-center justify-center gap-3">
-                             <img src={getLogo(winner)} className="w-10 h-10 drop-shadow-lg" alt=""/> {winner}
-                          </div>
-                        </div>
-                      )}
+                      {['t1', 't2'].map(key => {
+                        const team = m[key];
+                        const isWinner = myPicks.series?.[m.id]?.winner === team;
+                        return (
+                          <button key={team} onClick={() => handleSeriesPick(m.id, 'winner', team)} className={`w-full flex items-center gap-3 p-3 transition-all ${isWinner ? 'bg-blue-600/20 text-white' : 'hover:bg-slate-800 text-slate-400'}`}>
+                            <img src={getLogo(team)} className="w-6 h-6 shrink-0" alt=""/>
+                            <span className={`text-sm font-bold ${isWinner ? 'text-blue-400' : ''}`}>{team}</span>
+                            {isWinner && <HockeyIcon name="CheckCircle2" className="ml-auto w-4 h-4 text-blue-400" />}
+                          </button>
+                        );
+                      })}
                     </div>
-                  );
-                })}
-              </div>
+                  ))}
+                </div>
 
+                {/* ROUND 2 */}
+                <div className="flex flex-col gap-8 w-56 md:w-64 justify-around shrink-0">
+                  <div className="text-center font-black text-[10px] text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2">Conf Semis</div>
+                  {ROUND_MATCHUPS.r2.map(m => (
+                    <div key={m.id} className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-blue-900/50">
+                      <div className="bg-slate-800/50 p-2 border-b border-slate-800 text-[10px] font-bold text-slate-500">{m.region} Semis</div>
+                      {['p1', 'p2'].map((field, idx) => {
+                        const pool = idx === 0 ? m.poolT1 : m.poolT2;
+                        const selected = myPicks.series?.[m.id]?.[field] || '';
+                        const isWinner = myPicks.series?.[m.id]?.winner === selected && selected !== '';
+                        return (
+                          <div key={field} className="flex items-center gap-1 p-1 bg-slate-950/20">
+                            <select 
+                              value={selected} 
+                              onChange={(e) => handleSeriesPick(m.id, field, e.target.value)} 
+                              className="flex-1 bg-slate-900 text-xs font-bold p-2 text-slate-300 rounded outline-none border border-slate-800 focus:border-blue-500 cursor-pointer"
+                            >
+                              <option value="">Select Team...</option>
+                              {pool.map(t => <option key={t} value={t}>{t}</option>)}
+                            </select>
+                            <button 
+                              disabled={!selected}
+                              onClick={() => handleSeriesPick(m.id, 'winner', selected)}
+                              className={`p-2 rounded transition-all ${isWinner ? 'text-blue-400' : 'text-slate-700 hover:text-slate-500'}`}
+                            >
+                              <HockeyIcon name="CheckCircle2" className="w-5 h-5" />
+                            </button>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  ))}
+                </div>
+
+                {/* ROUND 3 */}
+                <div className="flex flex-col gap-8 w-56 md:w-64 justify-around shrink-0">
+                  <div className="text-center font-black text-[10px] text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2">Conf Finals</div>
+                  {ROUND_MATCHUPS.r3.map(m => (
+                    <div key={m.id} className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-blue-700">
+                      <div className="bg-slate-800/50 p-2 border-b border-slate-800 text-[10px] font-bold text-slate-500">{m.region} Finals</div>
+                      {['p1', 'p2'].map((field, idx) => {
+                        const pool = idx === 0 ? m.poolT1 : m.poolT2;
+                        const selected = myPicks.series?.[m.id]?.[field] || '';
+                        const isWinner = myPicks.series?.[m.id]?.winner === selected && selected !== '';
+                        return (
+                          <div key={field} className="flex items-center gap-1 p-2 bg-slate-950/20">
+                            <select 
+                              value={selected} 
+                              onChange={(e) => handleSeriesPick(m.id, field, e.target.value)} 
+                              className="flex-1 bg-slate-900 text-xs font-bold p-2.5 text-slate-300 rounded outline-none border border-slate-800 focus:border-blue-500 cursor-pointer"
+                            >
+                              <option value="">Select Team...</option>
+                              {pool.map(t => <option key={t} value={t}>{t}</option>)}
+                            </select>
+                            <button 
+                              disabled={!selected}
+                              onClick={() => handleSeriesPick(m.id, 'winner', selected)}
+                              className={`p-2 rounded transition-all ${isWinner ? 'text-blue-400' : 'text-slate-700 hover:text-slate-500'}`}
+                            >
+                              <HockeyIcon name="CheckCircle2" className="w-6 h-6" />
+                            </button>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  ))}
+                </div>
+
+                {/* CUP FINAL */}
+                <div className="flex flex-col w-64 md:w-80 justify-center shrink-0">
+                  <div className="text-center font-black text-[10px] text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2 mb-4">Stanley Cup Final</div>
+                  {ROUND_MATCHUPS.r4.map(m => {
+                    const winner = myPicks.series?.[m.id]?.winner || '';
+                    return (
+                      <div key={m.id} className="space-y-4">
+                        <div className="bg-slate-900 border border-blue-600/30 rounded-2xl overflow-hidden shadow-2xl relative">
+                          <div className="bg-slate-800/80 p-3 flex justify-center"><HockeyIcon name="Trophy" className="text-yellow-500 w-10 h-10 animate-pulse"/></div>
+                          {['p1', 'p2'].map((field, idx) => {
+                            const pool = idx === 0 ? m.poolT1 : m.poolT2;
+                            const selected = myPicks.series?.[m.id]?.[field] || '';
+                            const isWinner = winner === selected && selected !== '';
+                            return (
+                              <div key={field} className="flex items-center gap-3 p-4 bg-slate-950/10 border-b border-slate-800 last:border-0">
+                                <select 
+                                  value={selected} 
+                                  onChange={(e) => handleSeriesPick(m.id, field, e.target.value)} 
+                                  className="flex-1 bg-slate-950 text-base font-black p-3 text-white rounded-lg border border-slate-700 focus:border-yellow-500 outline-none cursor-pointer"
+                                >
+                                  <option value="">Select Champion...</option>
+                                  {pool.map(t => <option key={t} value={t}>{t}</option>)}
+                                </select>
+                                <button 
+                                  disabled={!selected}
+                                  onClick={() => { 
+                                    handleSeriesPick(m.id, 'winner', selected);
+                                    setMyPicks(prev => ({ ...prev, cupWinner: selected }));
+                                  }}
+                                  className={`p-3 rounded-full transition-all ${isWinner ? 'bg-yellow-500 text-slate-900' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
+                                >
+                                  <HockeyIcon name="Trophy" className="w-6 h-6" />
+                                </button>
+                              </div>
+                            )
+                          })}
+                        </div>
+                        
+                        {winner && (
+                          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-5 text-center animate-in zoom-in duration-500 shadow-lg">
+                            <div className="text-[10px] font-black text-yellow-500 uppercase mb-1">Your 2026 Champion</div>
+                            <div className="text-3xl font-black text-white flex items-center justify-center gap-3">
+                               <img src={getLogo(winner)} className="w-10 h-10 drop-shadow-lg" alt=""/> {winner}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+              </div>
             </div>
           </div>
         )}
