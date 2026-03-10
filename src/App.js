@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, useEffect, Fragment, useRef } from 'react';
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
@@ -151,6 +151,13 @@ const MOCK_GAMES = [
   { id: 2, gameState: "FINAL", clock: { timeRemaining: "00:00", period: 3 }, awayTeam: { abbrev: "TOR", score: 4 }, homeTeam: { abbrev: "BOS", score: 3 } }
 ];
 
+const MOCK_GIFS = [
+  "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExcDB5czI5d3hpYTI4NXZzZ3NrcHpsa3VyaHhsdDBkZDgyYWxyd2NnciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7WIBGvwA4YlHkZpK/giphy.gif",
+  "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExcGZyNW0xaHFjdWFwNWV1MjdveTZrdWVjcDVkOXF2OW5rYmJ1OHFqZyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xT1XGY8u2hJEM35Vhm/giphy.gif",
+  "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpjc2htY2szbzlkYnBhMzhtZncyd3ZzYWVjdDlzYnV6bmJpd285diZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l0HlJDaeqNfC08ZkA/giphy.gif",
+  "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExYTVwc3JpMXh2OTcwcHV2cDBrdzJqMnAwMWVncWJtdW55OGZtbG9qMSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o6Zt8b3UcKN21fEyc/giphy.gif"
+];
+
 // --- Main App Component ---
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -160,7 +167,7 @@ function App() {
   const [loadingAuth, setLoadingAuth] = useState(true);
   const [loadingData, setLoadingData] = useState(true);
   const [hasJoined, setHasJoined] = useState(false);
-  const [myParticipantId, setMyParticipantId] = useState(null); // Track the true document ID
+  const [myParticipantId, setMyParticipantId] = useState(null); 
   const [picksLoaded, setPicksLoaded] = useState(false);
   const [participants, setParticipants] = useState([]);
   const [newParticipantName, setNewParticipantName] = useState('');
@@ -168,6 +175,12 @@ function App() {
   const [liveGames, setLiveGames] = useState([]);
   const [aiAnalysis, setAiAnalysis] = useState({});
   const [trashTalk, setTrashTalk] = useState({});
+  
+  // Chat State
+  const [chatMessages, setChatMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [showGifs, setShowGifs] = useState(false);
+  const chatEndRef = useRef(null);
 
   const sortedParticipants = [...participants].sort((a, b) => (b.points || 0) - (a.points || 0));
 
@@ -190,6 +203,7 @@ function App() {
     return () => unsubscribe();
   }, []);
 
+  // Fetch Participants
   useEffect(() => {
     if (!user || !isConfigured) return;
     const colRef = collection(poolDb, 'artifacts', poolId, 'public', 'data', 'participants');
@@ -200,8 +214,6 @@ function App() {
         const data = d.data();
         parts.push({ id: d.id, ...data });
         
-        // CHECK IF THIS PROFILE BELONGS TO THIS DEVICE
-        // (Either by original UID or by checking the linked devices array)
         if (d.id === user.uid || (data.uids && data.uids.includes(user.uid))) {
           me = { id: d.id, ...data };
         }
@@ -225,6 +237,26 @@ function App() {
     });
     return () => unsubscribe();
   }, [user, picksLoaded]);
+
+  // Fetch Chat Messages
+  useEffect(() => {
+    if (!user || !hasJoined || !isConfigured) return;
+    const chatRef = collection(poolDb, 'artifacts', poolId, 'public', 'data', 'chat');
+    const unsubscribe = onSnapshot(chatRef, (snap) => {
+      const msgs = [];
+      snap.forEach(d => msgs.push({ id: d.id, ...d.data() }));
+      msgs.sort((a, b) => a.timestamp - b.timestamp); // Sort in JS memory to avoid index requirement
+      setChatMessages(msgs);
+    }, (err) => console.error(err));
+    return () => unsubscribe();
+  }, [user, hasJoined]);
+
+  // Auto-scroll chat to bottom
+  useEffect(() => {
+    if (activeTab === 'chat' && chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [chatMessages, activeTab]);
 
   useEffect(() => {
     let isMounted = true;
@@ -257,7 +289,6 @@ function App() {
   const handleSavePicks = async () => {
     if (!user || !hasJoined || !myParticipantId) return;
     try {
-      // Save picks to the correct document ID (not necessarily the current device's UID)
       await updateDoc(doc(poolDb, 'artifacts', poolId, 'public', 'data', 'participants', myParticipantId), {
         cupPick: myPicks.cupWinner, picks: myPicks.series
       });
@@ -271,11 +302,9 @@ function App() {
     const name = newParticipantName.trim();
     if (!name || !user) return;
 
-    // 1. Check if the name already exists in the pool (case-insensitive)
     const existingUser = participants.find(p => p.name.toLowerCase() === name.toLowerCase());
 
     if (existingUser) {
-      // 2. Name exists! Add the current device's UID to that user's profile to link them
       const currentUids = existingUser.uids || [existingUser.id];
       if (!currentUids.includes(user.uid)) {
         try {
@@ -285,18 +314,49 @@ function App() {
         } catch (err) { console.error(err); }
       }
       setNewParticipantName('');
-      return; // Exit early, the onSnapshot listener will log them in automatically
+      return; 
     }
 
-    // 3. Name does NOT exist. Create a brand new participant.
     try {
       await setDoc(doc(poolDb, 'artifacts', poolId, 'public', 'data', 'participants', user.uid), {
         name: name, points: 0, cupPick: "", r1Correct: 0,
         avatar: name.substring(0, 2).toUpperCase(), picks: DEFAULT_PICKS,
-        uids: [user.uid] // Start tracking allowed device UIDs
+        uids: [user.uid] 
       });
       setNewParticipantName('');
     } catch (err) { console.error(err); }
+  };
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim() || !user || !myParticipantId) return;
+
+    const myName = participants.find(p => p.id === myParticipantId)?.name || 'Anonymous';
+    const msgText = newMessage.trim();
+    setNewMessage(''); 
+    setShowGifs(false);
+
+    try {
+      const newDocRef = doc(collection(poolDb, 'artifacts', poolId, 'public', 'data', 'chat'));
+      await setDoc(newDocRef, {
+        text: msgText,
+        uid: user.uid,
+        senderName: myName,
+        timestamp: Date.now()
+      });
+    } catch (err) { console.error(err); }
+  };
+
+  const renderMessageText = (text) => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.split(urlRegex).map((part, i) => {
+      if (part.match(/(https?:\/\/[^\s]+(\.gif|\.jpg|\.jpeg|\.png|\.webp))/i)) {
+        return <img key={i} src={part} alt="chat attachment" className="max-w-full h-auto rounded-lg mt-2 max-h-48 border border-slate-700/50 shadow-sm" />;
+      } else if (part.match(urlRegex)) {
+        return <a key={i} href={part} target="_blank" rel="noreferrer" className="text-blue-300 underline break-all hover:text-blue-200">{part}</a>;
+      }
+      return <span key={i} className="break-words">{part}</span>;
+    });
   };
 
   const handleAddParticipant = async () => {
@@ -306,7 +366,7 @@ function App() {
       await setDoc(doc(poolDb, 'artifacts', poolId, 'public', 'data', 'participants', offlineId), {
         name: newParticipantName.trim(), points: 0, cupPick: "", r1Correct: 0,
         avatar: newParticipantName.substring(0, 2).toUpperCase(), picks: DEFAULT_PICKS,
-        uids: [] // Empty means no device has claimed this account yet
+        uids: [] 
       });
       setNewParticipantName('');
     } catch (err) { console.error(err); }
@@ -401,6 +461,7 @@ function App() {
           <NavItem id="dashboard" icon={<HockeyIcon name="LayoutDashboard"/>} label="Dashboard" activeTab={activeTab} setActiveTab={setActiveTab} />
           <NavItem id="mypicks" icon={<HockeyIcon name="Edit3"/>} label="My Picks" activeTab={activeTab} setActiveTab={setActiveTab} />
           <NavItem id="leaderboard" icon={<HockeyIcon name="Trophy"/>} label="Leaderboard" activeTab={activeTab} setActiveTab={setActiveTab} />
+          <NavItem id="chat" icon={<HockeyIcon name="MessageSquare"/>} label="Locker Room" activeTab={activeTab} setActiveTab={setActiveTab} />
           <NavItem id="live" icon={<HockeyIcon name="Activity"/>} label="Live Action" activeTab={activeTab} setActiveTab={setActiveTab} />
           <div className="md:mt-auto hidden md:block border-t border-slate-800 pt-4" />
           <NavItem id="manage" icon={<HockeyIcon name="Settings"/>} label="Manage Pool" activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -439,6 +500,74 @@ function App() {
                   </tbody></table>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'chat' && (
+          <div className="space-y-4 animate-in fade-in duration-300 flex flex-col h-[calc(100vh-8rem)] md:h-[calc(100vh-4rem)]">
+            <h2 className="text-3xl font-bold">Locker Room</h2>
+            <div className="flex-1 bg-slate-900 border border-slate-700 rounded-2xl flex flex-col overflow-hidden shadow-xl">
+              
+              {/* Messages Area */}
+              <div className="flex-1 p-4 overflow-y-auto space-y-4">
+                {chatMessages.length === 0 && <div className="text-center text-slate-500 mt-10 italic">The locker room is quiet. Start the trash talk!</div>}
+                
+                {chatMessages.map(msg => {
+                  const isMe = msg.uid === user?.uid;
+                  return (
+                    <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                      <span className="text-[10px] font-bold text-slate-500 mb-1 ml-1 tracking-wider uppercase">{msg.senderName}</span>
+                      <div className={`px-4 py-2.5 rounded-2xl max-w-[85%] md:max-w-[70%] text-sm leading-relaxed shadow-sm ${
+                        isMe ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-slate-800 text-slate-200 border border-slate-700 rounded-bl-sm'
+                      }`}>
+                        {renderMessageText(msg.text)}
+                      </div>
+                    </div>
+                  )
+                })}
+                <div ref={chatEndRef} />
+              </div>
+
+              {/* Input Area */}
+              <div className="p-3 bg-slate-800 border-t border-slate-700 flex flex-col gap-2 relative">
+                
+                {/* GIF Drawer */}
+                {showGifs && (
+                  <div className="flex gap-2 overflow-x-auto pb-2 mb-2 no-scrollbar animate-in slide-in-from-bottom-2">
+                    {MOCK_GIFS.map((gif, idx) => (
+                      <img key={idx} src={gif} alt="gif option" onClick={() => { setNewMessage(gif); setShowGifs(false); }} className="h-20 w-auto cursor-pointer rounded-lg border-2 border-transparent hover:border-blue-500 transition-colors shadow-lg" />
+                    ))}
+                  </div>
+                )}
+
+                {/* Emojis & Controls */}
+                <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar items-center">
+                  <button type="button" onClick={() => setShowGifs(!showGifs)} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${showGifs ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
+                    GIFs
+                  </button>
+                  <div className="w-px h-4 bg-slate-600 mx-1"></div>
+                  {['🏒', '🚨', '🥅', '🍻', '🗑️', '🤡', '🥶', '🔥'].map(emoji => (
+                    <button key={emoji} type="button" onClick={() => setNewMessage(prev => prev + emoji)} className="p-1 hover:bg-slate-700 rounded-lg text-xl transition-transform active:scale-90">
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+
+                <form onSubmit={handleSendMessage} className="flex gap-2">
+                  <input 
+                    type="text" 
+                    value={newMessage} 
+                    onChange={e => setNewMessage(e.target.value)} 
+                    placeholder="Talk some trash or paste an image link..." 
+                    className="flex-1 bg-slate-950 border border-slate-700 text-white rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors"
+                  />
+                  <button type="submit" disabled={!newMessage.trim()} className="bg-blue-600 text-white px-5 rounded-xl font-bold flex items-center justify-center transition-transform active:scale-95 disabled:opacity-50 disabled:active:scale-100 shadow-lg shadow-blue-500/20">
+                    <HockeyIcon name="MessageSquare" />
+                  </button>
+                </form>
+              </div>
+
             </div>
           </div>
         )}
