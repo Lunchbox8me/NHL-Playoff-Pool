@@ -160,6 +160,7 @@ function App() {
   const [loadingAuth, setLoadingAuth] = useState(true);
   const [loadingData, setLoadingData] = useState(true);
   const [hasJoined, setHasJoined] = useState(false);
+  const [myParticipantId, setMyParticipantId] = useState(null); // Track the true document ID
   const [picksLoaded, setPicksLoaded] = useState(false);
   const [participants, setParticipants] = useState([]);
   const [newParticipantName, setNewParticipantName] = useState('');
@@ -198,12 +199,19 @@ function App() {
       snap.forEach(d => {
         const data = d.data();
         parts.push({ id: d.id, ...data });
-        if (d.id === user.uid) me = { id: d.id, ...data };
+        
+        // CHECK IF THIS PROFILE BELONGS TO THIS DEVICE
+        // (Either by original UID or by checking the linked devices array)
+        if (d.id === user.uid || (data.uids && data.uids.includes(user.uid))) {
+          me = { id: d.id, ...data };
+        }
       });
       setParticipants(parts);
       setLoadingData(false);
+      
       if (me) {
         setHasJoined(true);
+        setMyParticipantId(me.id);
         if (!picksLoaded) {
           setMyPicks({ cupWinner: me.cupPick || '', series: me.picks || DEFAULT_PICKS });
           setPicksLoaded(true);
@@ -247,9 +255,10 @@ function App() {
   };
 
   const handleSavePicks = async () => {
-    if (!user || !hasJoined) return;
+    if (!user || !hasJoined || !myParticipantId) return;
     try {
-      await updateDoc(doc(poolDb, 'artifacts', poolId, 'public', 'data', 'participants', user.uid), {
+      // Save picks to the correct document ID (not necessarily the current device's UID)
+      await updateDoc(doc(poolDb, 'artifacts', poolId, 'public', 'data', 'participants', myParticipantId), {
         cupPick: myPicks.cupWinner, picks: myPicks.series
       });
       setSaveSuccess(true);
@@ -259,11 +268,32 @@ function App() {
 
   const handleJoinPool = async (e) => {
     e.preventDefault();
-    if (!newParticipantName.trim() || !user) return;
+    const name = newParticipantName.trim();
+    if (!name || !user) return;
+
+    // 1. Check if the name already exists in the pool (case-insensitive)
+    const existingUser = participants.find(p => p.name.toLowerCase() === name.toLowerCase());
+
+    if (existingUser) {
+      // 2. Name exists! Add the current device's UID to that user's profile to link them
+      const currentUids = existingUser.uids || [existingUser.id];
+      if (!currentUids.includes(user.uid)) {
+        try {
+          await updateDoc(doc(poolDb, 'artifacts', poolId, 'public', 'data', 'participants', existingUser.id), {
+            uids: [...currentUids, user.uid]
+          });
+        } catch (err) { console.error(err); }
+      }
+      setNewParticipantName('');
+      return; // Exit early, the onSnapshot listener will log them in automatically
+    }
+
+    // 3. Name does NOT exist. Create a brand new participant.
     try {
       await setDoc(doc(poolDb, 'artifacts', poolId, 'public', 'data', 'participants', user.uid), {
-        name: newParticipantName.trim(), points: 0, cupPick: "", r1Correct: 0,
-        avatar: newParticipantName.substring(0, 2).toUpperCase(), picks: DEFAULT_PICKS
+        name: name, points: 0, cupPick: "", r1Correct: 0,
+        avatar: name.substring(0, 2).toUpperCase(), picks: DEFAULT_PICKS,
+        uids: [user.uid] // Start tracking allowed device UIDs
       });
       setNewParticipantName('');
     } catch (err) { console.error(err); }
@@ -274,8 +304,9 @@ function App() {
     try {
       const offlineId = crypto.randomUUID();
       await setDoc(doc(poolDb, 'artifacts', poolId, 'public', 'data', 'participants', offlineId), {
-        name: newParticipantName.trim() + " (Offline)", points: 0, cupPick: "", r1Correct: 0,
-        avatar: newParticipantName.substring(0, 2).toUpperCase(), picks: DEFAULT_PICKS
+        name: newParticipantName.trim(), points: 0, cupPick: "", r1Correct: 0,
+        avatar: newParticipantName.substring(0, 2).toUpperCase(), picks: DEFAULT_PICKS,
+        uids: [] // Empty means no device has claimed this account yet
       });
       setNewParticipantName('');
     } catch (err) { console.error(err); }
@@ -318,7 +349,7 @@ function App() {
   const handleGenerateTrashTalk = async (opponent) => {
     if (!user) return;
     setTrashTalk(prev => ({ ...prev, [opponent.id]: { loading: true, text: '' } }));
-    const myInfo = sortedParticipants.find(p => p.id === user.uid);
+    const myInfo = sortedParticipants.find(p => p.id === myParticipantId);
     const text = await callGemini(`Write PG trash talk to ${opponent.name} (${opponent.points} pts, picked ${opponent.cupPick}). I have ${myInfo?.points || 0} pts. Max 2 sentences, no emojis.`);
     setTrashTalk(prev => ({ ...prev, [opponent.id]: { loading: false, text } }));
   };
@@ -476,7 +507,7 @@ function App() {
                         <td className="p-4 text-right">
                           <div className="flex flex-col items-end gap-1">
                             <span className="font-black text-xl text-white tracking-tighter">{u.points || 0}</span>
-                            {u.id !== user?.uid && <button onClick={() => handleGenerateTrashTalk(u)} className="text-[10px] font-black text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded hover:bg-blue-500/20 transition-all active:scale-95 opacity-0 group-hover:opacity-100 focus:opacity-100">✨ CHIRP</button>}
+                            {u.id !== myParticipantId && <button onClick={() => handleGenerateTrashTalk(u)} className="text-[10px] font-black text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded hover:bg-blue-500/20 transition-all active:scale-95 opacity-0 group-hover:opacity-100 focus:opacity-100">✨ CHIRP</button>}
                           </div>
                         </td>
                       </tr>
