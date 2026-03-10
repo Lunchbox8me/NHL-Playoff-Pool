@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Fragment, useRef } from 'react';
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
+import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, getDoc } from 'firebase/firestore';
 
 // ⬇️⬇️⬇️ YOUR FIREBASE KEYS ARE NOW INJECTED HERE ⬇️⬇️⬇️
 const FIREBASE_KEYS = {
@@ -14,7 +14,7 @@ const FIREBASE_KEYS = {
 };
 // ⬆️⬆️⬆️ YOUR FIREBASE KEYS ARE NOW INJECTED HERE ⬆️⬆️⬆️
 
-// --- INJECT TAILWIND CSS FOR CODESANDBOX ---
+// --- INJECT TAILWIND CSS ---
 if (typeof document !== 'undefined' && !document.getElementById('tailwind-cdn')) {
   const script = document.createElement('script');
   script.id = 'tailwind-cdn';
@@ -22,7 +22,6 @@ if (typeof document !== 'undefined' && !document.getElementById('tailwind-cdn'))
   document.head.appendChild(script);
 }
 
-/** * Logic to ensure Firebase is initialized only once */
 let poolConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
 if (!poolConfig.apiKey) poolConfig = FIREBASE_KEYS;
 
@@ -60,6 +59,7 @@ const HockeyIcon = ({ name, className = "" }) => {
   if (name === 'MessageSquare') return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>;
   if (name === 'Bell') return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>;
   if (name === 'BellOff') return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}><path d="M13.73 21a2 2 0 0 1-3.46 0"/><path d="M18.63 13A17.89 17.89 0 0 1 18 8"/><path d="M6.26 6.26A5.86 5.86 0 0 0 6 8c0 7-3 9-3 9h14"/><path d="M18 8a6 6 0 0 0-9.33-5"/><line x1="1" y1="1" x2="23" y2="23"/></svg>;
+  if (name === 'User') return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
   
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}></svg>;
 };
@@ -85,7 +85,6 @@ const NavItem = ({ id, icon, label, activeTab, setActiveTab }) => {
   );
 };
 
-// --- GEMINI API PROMPT HANDLER ---
 const callGemini = async (prompt) => {
   const apiKey = "";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
@@ -109,33 +108,33 @@ const callGemini = async (prompt) => {
   }
 };
 
-// --- Static Data ---
+// --- Static Structure ---
 const TEAMS = ["NYR", "WSH", "CAR", "NYI", "FLA", "TBL", "BOS", "TOR", "DAL", "VGK", "WPG", "COL", "VAN", "NSH", "EDM", "LAK"];
 const EAST_TEAMS = ["NYR", "WSH", "CAR", "NYI", "FLA", "TBL", "BOS", "TOR"];
 const WEST_TEAMS = ["DAL", "VGK", "WPG", "COL", "VAN", "NSH", "EDM", "LAK"];
 
-const getLogo = (abbrev) => `https://assets.nhle.com/logos/nhl/svg/${abbrev}_light.svg`;
+const getLogo = (abbrev) => abbrev ? `https://assets.nhle.com/logos/nhl/svg/${abbrev}_light.svg` : '';
 
-const ROUND_MATCHUPS = {
+const ROUND_MATCHUPS_STRUCTURE = {
   r1: [
-    { id: 'E1', t1: 'NYR', t2: 'WSH', region: 'East', poolT1: ['NYR'], poolT2: ['WSH'] },
-    { id: 'E2', t1: 'FLA', t2: 'TBL', region: 'East', poolT1: ['FLA'], poolT2: ['TBL'] },
-    { id: 'E3', t1: 'CAR', t2: 'NYI', region: 'East', poolT1: ['CAR'], poolT2: ['NYI'] },
-    { id: 'E4', t1: 'BOS', t2: 'TOR', region: 'East', poolT1: ['BOS'], poolT2: ['TOR'] },
-    { id: 'W1', t1: 'DAL', t2: 'VGK', region: 'West', poolT1: ['DAL'], poolT2: ['VGK'] },
-    { id: 'W2', t1: 'VAN', t2: 'NSH', region: 'West', poolT1: ['VAN'], poolT2: ['NSH'] },
-    { id: 'W3', t1: 'WPG', t2: 'COL', region: 'West', poolT1: ['WPG'], poolT2: ['COL'] },
-    { id: 'W4', t1: 'EDM', t2: 'LAK', region: 'West', poolT1: ['EDM'], poolT2: ['LAK'] },
+    { id: 'E1', region: 'East', poolT1: ['NYR'], poolT2: ['WSH'], defaultTeams: { t1: 'NYR', t2: 'WSH' } },
+    { id: 'E2', region: 'East', poolT1: ['FLA'], poolT2: ['TBL'], defaultTeams: { t1: 'FLA', t2: 'TBL' } },
+    { id: 'E3', region: 'East', poolT1: ['CAR'], poolT2: ['NYI'], defaultTeams: { t1: 'CAR', t2: 'NYI' } },
+    { id: 'E4', region: 'East', poolT1: ['BOS'], poolT2: ['TOR'], defaultTeams: { t1: 'BOS', t2: 'TOR' } },
+    { id: 'W1', region: 'West', poolT1: ['DAL'], poolT2: ['VGK'], defaultTeams: { t1: 'DAL', t2: 'VGK' } },
+    { id: 'W2', region: 'West', poolT1: ['VAN'], poolT2: ['NSH'], defaultTeams: { t1: 'VAN', t2: 'NSH' } },
+    { id: 'W3', region: 'West', poolT1: ['WPG'], poolT2: ['COL'], defaultTeams: { t1: 'WPG', t2: 'COL' } },
+    { id: 'W4', region: 'West', poolT1: ['EDM'], poolT2: ['LAK'], defaultTeams: { t1: 'EDM', t2: 'LAK' } },
   ],
   r2: [
-    { id: 'ES1', region: 'East', poolT1: ['NYR', 'WSH'], poolT2: ['FLA', 'TBL'] },
-    { id: 'ES2', region: 'East', poolT1: ['CAR', 'NYI'], poolT2: ['BOS', 'TOR'] },
-    { id: 'WS1', region: 'West', poolT1: ['DAL', 'VGK'], poolT2: ['VAN', 'NSH'] },
-    { id: 'WS2', region: 'West', poolT1: ['WPG', 'COL'], poolT2: ['EDM', 'LAK'] },
+    { id: 'ES1', region: 'East', poolT1: EAST_TEAMS, poolT2: EAST_TEAMS },
+    { id: 'ES2', region: 'East', poolT1: EAST_TEAMS, poolT2: EAST_TEAMS },
+    { id: 'WS1', region: 'West', poolT1: WEST_TEAMS, poolT2: WEST_TEAMS },
+    { id: 'WS2', region: 'West', poolT1: WEST_TEAMS, poolT2: WEST_TEAMS },
   ],
   r3: [
-    { id: 'EF', region: 'East', poolT1: ['NYR', 'WSH', 'FLA', 'TBL'], poolT2: ['CAR', 'NYI', 'BOS', 'TOR'] },
-    { id: 'WF', region: 'West', poolT1: ['DAL', 'VGK', 'VAN', 'NSH'], poolT2: ['WPG', 'COL', 'EDM', 'LAK'] },
+    { id: 'EF', region: 'East', poolT1: EAST_TEAMS, poolT2: EAST_TEAMS },
+    { id: 'WF', region: 'West', poolT1: WEST_TEAMS, poolT2: WEST_TEAMS },
   ],
   r4: [
     { id: 'SCF', region: 'Cup Final', poolT1: EAST_TEAMS, poolT2: WEST_TEAMS },
@@ -143,10 +142,10 @@ const ROUND_MATCHUPS = {
 };
 
 const ALL_MATCHUP_IDS = [
-  ...ROUND_MATCHUPS.r1.map(m => m.id),
-  ...ROUND_MATCHUPS.r2.map(m => m.id),
-  ...ROUND_MATCHUPS.r3.map(m => m.id),
-  ...ROUND_MATCHUPS.r4.map(m => m.id)
+  ...ROUND_MATCHUPS_STRUCTURE.r1.map(m => m.id),
+  ...ROUND_MATCHUPS_STRUCTURE.r2.map(m => m.id),
+  ...ROUND_MATCHUPS_STRUCTURE.r3.map(m => m.id),
+  ...ROUND_MATCHUPS_STRUCTURE.r4.map(m => m.id)
 ];
 
 const DEFAULT_PICKS = ALL_MATCHUP_IDS.reduce((acc, id) => {
@@ -155,34 +154,32 @@ const DEFAULT_PICKS = ALL_MATCHUP_IDS.reduce((acc, id) => {
 }, {});
 
 const TEAM_ROSTERS = {
-  "NYR": [{ name: "A. Panarin", pos: "LW" }, { name: "M. Zibanejad", pos: "C" }, { name: "C. Kreider", pos: "LW" }, { name: "A. Fox", pos: "D" }],
-  "WSH": [{ name: "A. Ovechkin", pos: "LW" }, { name: "D. Strome", pos: "C" }, { name: "J. Carlson", pos: "D" }, { name: "T. Wilson", pos: "RW" }],
-  "CAR": [{ name: "S. Aho", pos: "C" }, { name: "A. Svechnikov", pos: "RW" }, { name: "J. Guentzel", pos: "LW" }, { name: "S. Jarvis", pos: "C" }],
-  "NYI": [{ name: "M. Barzal", pos: "C" }, { name: "B. Horvat", pos: "C" }, { name: "B. Nelson", pos: "C" }, { name: "N. Dobson", pos: "D" }],
-  "FLA": [{ name: "A. Barkov", pos: "C" }, { name: "M. Tkachuk", pos: "RW" }, { name: "S. Reinhart", pos: "C" }, { name: "C. Verhaeghe", pos: "C" }],
-  "TBL": [{ name: "N. Kucherov", pos: "RW" }, { name: "B. Point", pos: "C" }, { name: "S. Stamkos", pos: "C" }, { name: "V. Hedman", pos: "D" }],
-  "BOS": [{ name: "D. Pastrnak", pos: "RW" }, { name: "B. Marchand", pos: "LW" }, { name: "C. McAvoy", pos: "D" }, { name: "C. Coyle", pos: "C" }],
-  "TOR": [{ name: "A. Matthews", pos: "C" }, { name: "M. Marner", pos: "RW" }, { name: "W. Nylander", pos: "RW" }, { name: "J. Tavares", pos: "C" }],
-  "DAL": [{ name: "J. Robertson", pos: "LW" }, { name: "R. Hintz", pos: "C" }, { name: "M. Heiskanen", pos: "D" }, { name: "J. Pavelski", pos: "C" }],
-  "VGK": [{ name: "J. Eichel", pos: "C" }, { name: "J. Marchessault", pos: "RW" }, { name: "M. Stone", pos: "RW" }, { name: "S. Theodore", pos: "D" }],
-  "WPG": [{ name: "M. Scheifele", pos: "C" }, { name: "K. Connor", pos: "LW" }, { name: "J. Morrissey", pos: "D" }, { name: "N. Ehlers", pos: "LW" }],
-  "COL": [{ name: "N. MacKinnon", pos: "C" }, { name: "M. Rantanen", pos: "RW" }, { name: "C. Makar", pos: "D" }, { name: "V. Nichushkin", pos: "RW" }],
-  "VAN": [{ name: "E. Pettersson", pos: "C" }, { name: "J. Miller", pos: "C" }, { name: "Q. Hughes", pos: "D" }, { name: "B. Boeser", pos: "RW" }],
-  "NSH": [{ name: "F. Forsberg", pos: "LW" }, { name: "R. Josi", pos: "D" }, { name: "R. O'Reilly", pos: "C" }, { name: "G. Nyquist", pos: "LW" }],
-  "EDM": [{ name: "C. McDavid", pos: "C" }, { name: "L. Draisaitl", pos: "C" }, { name: "Z. Hyman", pos: "LW" }, { name: "E. Bouchard", pos: "D" }],
-  "LAK": [{ name: "A. Kopitar", pos: "C" }, { name: "K. Fiala", pos: "LW" }, { name: "A. Kempe", pos: "RW" }, { name: "D. Doughty", pos: "D" }],
+  "NYR": [{ name: "A. Panarin" }, { name: "M. Zibanejad" }, { name: "C. Kreider" }, { name: "V. Trocheck" }],
+  "WSH": [{ name: "A. Ovechkin" }, { name: "D. Strome" }, { name: "J. Carlson" }, { name: "T. Wilson" }],
+  "CAR": [{ name: "S. Aho" }, { name: "A. Svechnikov" }, { name: "J. Guentzel" }, { name: "S. Jarvis" }],
+  "NYI": [{ name: "M. Barzal" }, { name: "B. Horvat" }, { name: "B. Nelson" }, { name: "K. Palmieri" }],
+  "FLA": [{ name: "A. Barkov" }, { name: "M. Tkachuk" }, { name: "S. Reinhart" }, { name: "C. Verhaeghe" }],
+  "TBL": [{ name: "N. Kucherov" }, { name: "B. Point" }, { name: "S. Stamkos" }, { name: "V. Hedman" }],
+  "BOS": [{ name: "D. Pastrnak" }, { name: "B. Marchand" }, { name: "C. McAvoy" }, { name: "C. Coyle" }],
+  "TOR": [{ name: "A. Matthews" }, { name: "M. Marner" }, { name: "W. Nylander" }, { name: "J. Tavares" }],
+  "DAL": [{ name: "J. Robertson" }, { name: "R. Hintz" }, { name: "M. Heiskanen" }, { name: "W. Johnston" }],
+  "VGK": [{ name: "J. Eichel" }, { name: "J. Marchessault" }, { name: "M. Stone" }, { name: "N. Hanifin" }],
+  "WPG": [{ name: "M. Scheifele" }, { name: "K. Connor" }, { name: "J. Morrissey" }, { name: "N. Ehlers" }],
+  "COL": [{ name: "N. MacKinnon" }, { name: "M. Rantanen" }, { name: "C. Makar" }, { name: "V. Nichushkin" }],
+  "VAN": [{ name: "E. Pettersson" }, { name: "J. Miller" }, { name: "Q. Hughes" }, { name: "B. Boeser" }],
+  "NSH": [{ name: "F. Forsberg" }, { name: "R. Josi" }, { name: "R. O'Reilly" }, { name: "G. Nyquist" }],
+  "EDM": [{ name: "C. McDavid" }, { name: "L. Draisaitl" }, { name: "Z. Hyman" }, { name: "E. Bouchard" }],
+  "LAK": [{ name: "A. Kopitar" }, { name: "K. Fiala" }, { name: "A. Kempe" }, { name: "V. Arvidsson" }],
 };
 
 const MOCK_GAMES = [
-  { id: 1, gameState: "LIVE", clock: { timeRemaining: "12:34", period: 2 }, awayTeam: { abbrev: "NYR", score: 2 }, homeTeam: { abbrev: "WSH", score: 1 } },
-  { id: 2, gameState: "FINAL", clock: { timeRemaining: "00:00", period: 3 }, awayTeam: { abbrev: "TOR", score: 4 }, homeTeam: { abbrev: "BOS", score: 3 } }
+  { id: 1, gameState: "LIVE", clock: { timeRemaining: "12:34", period: 2 }, awayTeam: { abbrev: "NYR", score: 2 }, homeTeam: { abbrev: "WSH", score: 1 } }
 ];
 
 const MOCK_GIFS = [
   "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExcDB5czI5d3hpYTI4NXZzZ3NrcHpsa3VyaHhsdDBkZDgyYWxyd2NnciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7WIBGvwA4YlHkZpK/giphy.gif",
   "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExcGZyNW0xaHFjdWFwNWV1MjdveTZrdWVjcDVkOXF2OW5rYmJ1OHFqZyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/xT1XGY8u2hJEM35Vhm/giphy.gif",
-  "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpjc2htY2szbzlkYnBhMzhtZncyd3ZzYWVjdDlzYnV6bmJpd285diZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l0HlJDaeqNfC08ZkA/giphy.gif",
-  "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExYTVwc3JpMXh2OTcwcHV2cDBrdzJqMnAwMWVncWJtdW55OGZtbG9qMSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o6Zt8b3UcKN21fEyc/giphy.gif"
+  "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpjc2htY2szbzlkYnBhMzhtZncyd3ZzYWVjdDlzYnV6bmJpd285diZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l0HlJDaeqNfC08ZkA/giphy.gif"
 ];
 
 // --- Main App Component ---
@@ -213,6 +210,9 @@ function App() {
   const [adminPasswordInput, setAdminPasswordInput] = useState('');
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   
+  // LIVE MATCHUPS (Editable by Admin)
+  const [liveMatchups, setLiveMatchups] = useState({});
+
   const chatEndRef = useRef(null);
   const prevMessagesLength = useRef(0);
 
@@ -237,12 +237,30 @@ function App() {
     return () => unsubscribe();
   }, []);
 
-  // Initialize notification state safely
+  // Initialize notifications
   useEffect(() => {
     if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
       setNotificationsEnabled(true);
     }
   }, []);
+
+  // Fetch Live Matchups
+  useEffect(() => {
+    if (!user || !isConfigured) return;
+    const matchRef = doc(poolDb, 'artifacts', poolId, 'public', 'data', 'settings', 'matchups');
+    const unsubscribe = onSnapshot(matchRef, (snap) => {
+      if (snap.exists()) {
+        setLiveMatchups(snap.data());
+      } else {
+        const defaults = ROUND_MATCHUPS_STRUCTURE.r1.reduce((acc, m) => {
+          acc[m.id] = m.defaultTeams;
+          return acc;
+        }, {});
+        setLiveMatchups(defaults);
+      }
+    });
+    return () => unsubscribe();
+  }, [user]);
 
   // Fetch Participants
   useEffect(() => {
@@ -254,19 +272,16 @@ function App() {
       snap.forEach(d => {
         const data = d.data();
         parts.push({ id: d.id, ...data });
-        
         if (d.id === user.uid || (data.uids && data.uids.includes(user.uid))) {
           me = { id: d.id, ...data };
         }
       });
       setParticipants(parts);
       setLoadingData(false);
-      
       if (me) {
         setHasJoined(true);
         setMyParticipantId(me.id);
         if (!picksLoaded) {
-          // Merge initial default picks with loaded picks to ensure all keys exist
           const mergedSeries = { ...DEFAULT_PICKS, ...(me.picks || {}) };
           setMyPicks({ cupWinner: me.cupPick || '', series: mergedSeries });
           setPicksLoaded(true);
@@ -281,58 +296,45 @@ function App() {
     return () => unsubscribe();
   }, [user, picksLoaded]);
 
-  // Fetch Chat Messages
+  // Fetch Chat
   useEffect(() => {
     if (!user || !hasJoined || !isConfigured) return;
     const chatRef = collection(poolDb, 'artifacts', poolId, 'public', 'data', 'chat');
     const unsubscribe = onSnapshot(chatRef, (snap) => {
       const msgs = [];
       snap.forEach(d => msgs.push({ id: d.id, ...d.data() }));
-      msgs.sort((a, b) => a.timestamp - b.timestamp); 
+      msgs.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0)); 
       setChatMessages(msgs);
     }, (err) => console.error(err));
     return () => unsubscribe();
   }, [user, hasJoined]);
 
-  // Watch for new messages and trigger notification
+  // Chat notification observer
   useEffect(() => {
     if (chatMessages.length > prevMessagesLength.current) {
       if (prevMessagesLength.current > 0 && notificationsEnabled) {
-        const newMsgs = chatMessages.slice(prevMessagesLength.current);
-        newMsgs.forEach(msg => {
-          if (msg.uid !== user?.uid) {
-            if (activeTab !== 'chat' || (typeof document !== 'undefined' && document.hidden)) {
-              if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-                try {
-                  new Notification(`IcePool: ${msg.senderName}`, {
-                    theme: 'dark',
-                    body: msg.text.includes('http') ? '🏒 Sent a GIF/Image' : msg.text,
-                  });
-                } catch (e) {
-                  console.error("Notification failed", e);
-                }
-              }
+        const newMsg = chatMessages[chatMessages.length - 1];
+        if (newMsg.uid !== user?.uid) {
+          if (activeTab !== 'chat' || (typeof document !== 'undefined' && document.hidden)) {
+            if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+              try { new Notification(`IcePool: ${newMsg.senderName}`, { body: newMsg.text.includes('http') ? 'Sent a GIF' : newMsg.text }); } catch (e) {}
             }
           }
-        });
+        }
       }
       prevMessagesLength.current = chatMessages.length;
     }
   }, [chatMessages, notificationsEnabled, user, activeTab]);
 
-  // Auto-scroll chat to bottom
   useEffect(() => {
     if (activeTab === 'chat' && chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [chatMessages, activeTab]);
 
-  // Pre-fill update name input
   useEffect(() => {
     const me = participants.find(p => p.id === myParticipantId);
-    if (me && !updateNameInput) {
-      setUpdateNameInput(me.name);
-    }
+    if (me && !updateNameInput) setUpdateNameInput(me.name);
   }, [participants, myParticipantId, updateNameInput]);
 
   useEffect(() => {
@@ -340,18 +342,10 @@ function App() {
     const fetchNHLData = async () => {
       try {
         const res = await fetch('https://api-web.nhle.com/v1/score/now');
-        if (!res.ok) throw new Error('API failed');
         const data = await res.json();
-        if (isMounted) {
-          let games = data.games || [];
-          if (games.length === 0 && data.gameWeek) {
-            const today = data.gameWeek.find(d => d.date === data.currentDate);
-            if (today) games = today.games;
-          }
-          setLiveGames(games.length > 0 ? games : MOCK_GAMES);
-        }
+        if (isMounted) setLiveGames(data.games?.length > 0 ? data.games : MOCK_GAMES);
       } catch (err) {
-        if (isMounted) { setLiveGames(MOCK_GAMES); }
+        if (isMounted) setLiveGames(MOCK_GAMES);
       }
     };
     fetchNHLData();
@@ -361,23 +355,8 @@ function App() {
 
   const handleSeriesPick = (matchupId, field, value) => {
     setMyPicks(prev => {
-      // Ensure the series item exists
-      const currentItem = prev.series[matchupId] || { winner: '', p1: '', p2: '' };
+      const currentItem = prev.series[matchupId] || { winner: '', p1: '', p2: '', topGoalScorer: '', topPointScorer: '' };
       const updatedSeries = { ...prev.series, [matchupId]: { ...currentItem, [field]: value } };
-      
-      // Suggesting winner logic for Round 1 to Round 2
-      if (field === 'winner') {
-        const r1Match = ROUND_MATCHUPS.r1.find(m => m.id === matchupId);
-        if (r1Match) {
-          const r2Target = ROUND_MATCHUPS.r2.find(m => m.poolT1.includes(r1Match.t1) || m.poolT2.includes(r1Match.t1));
-          if (r2Target) {
-            const slot = r2Target.poolT1.includes(r1Match.t1) ? 'p1' : 'p2';
-            const r2Item = updatedSeries[r2Target.id] || { winner: '', p1: '', p2: '' };
-            updatedSeries[r2Target.id] = { ...r2Item, [slot]: value };
-          }
-        }
-      }
-
       return { ...prev, series: updatedSeries };
     });
   };
@@ -397,172 +376,112 @@ function App() {
     e.preventDefault();
     const name = newParticipantName.trim();
     if (!name || !user) return;
-
     const existingUser = participants.find(p => p.name.toLowerCase() === name.toLowerCase());
-
     if (existingUser) {
       const currentUids = existingUser.uids || [existingUser.id];
       if (!currentUids.includes(user.uid)) {
-        try {
-          await updateDoc(doc(poolDb, 'artifacts', poolId, 'public', 'data', 'participants', existingUser.id), {
-            uids: [...currentUids, user.uid]
-          });
-        } catch (err) { console.error(err); }
+        try { await updateDoc(doc(poolDb, 'artifacts', poolId, 'public', 'data', 'participants', existingUser.id), { uids: [...currentUids, user.uid] }); } catch (err) {}
       }
       setNewParticipantName('');
       return; 
     }
-
     try {
       await setDoc(doc(poolDb, 'artifacts', poolId, 'public', 'data', 'participants', user.uid), {
-        name: name, points: 0, cupPick: "", r1Correct: 0,
-        avatar: name.substring(0, 2).toUpperCase(), picks: DEFAULT_PICKS,
-        uids: [user.uid] 
+        name, points: 0, cupPick: "", avatar: name.substring(0, 2).toUpperCase(), picks: DEFAULT_PICKS, uids: [user.uid] 
       });
       setNewParticipantName('');
-    } catch (err) { console.error(err); }
+    } catch (err) {}
   };
 
   const toggleNotifications = async () => {
-    if (typeof window === 'undefined' || !('Notification' in window)) {
-      return;
-    }
-    
-    if (notificationsEnabled) {
-      setNotificationsEnabled(false);
-    } else {
-      if (Notification.permission === 'granted') {
-        setNotificationsEnabled(true);
-      } else if (Notification.permission !== 'denied') {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-          setNotificationsEnabled(true);
-        }
-      }
+    if (typeof window === 'undefined' || !('Notification' in window)) return;
+    if (notificationsEnabled) setNotificationsEnabled(false);
+    else if (Notification.permission === 'granted') setNotificationsEnabled(true);
+    else {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') setNotificationsEnabled(true);
     }
   };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !user || !myParticipantId) return;
-
     const myName = participants.find(p => p.id === myParticipantId)?.name || 'Anonymous';
     const msgText = newMessage.trim();
     setNewMessage(''); 
     setShowGifs(false);
-
     try {
-      const newDocRef = doc(collection(poolDb, 'artifacts', poolId, 'public', 'data', 'chat'));
-      await setDoc(newDocRef, {
-        text: msgText,
-        uid: user.uid,
-        senderName: myName,
-        timestamp: Date.now()
+      await setDoc(doc(collection(poolDb, 'artifacts', poolId, 'public', 'data', 'chat')), {
+        text: msgText, uid: user.uid, senderName: myName, timestamp: Date.now()
       });
-    } catch (err) { console.error(err); }
+    } catch (err) {}
   };
 
   const renderMessageText = (text) => {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     return text.split(urlRegex).map((part, i) => {
-      if (part.match(/(https?:\/\/[^\s]+(\.gif|\.jpg|\.jpeg|\.png|\.webp))/i)) {
-        return <img key={i} src={part} alt="chat attachment" className="max-w-full h-auto rounded-lg mt-2 max-h-48 border border-slate-700/50 shadow-sm" />;
-      } else if (part.match(urlRegex)) {
-        return <a key={i} href={part} target="_blank" rel="noreferrer" className="text-blue-300 underline break-all hover:text-blue-200">{part}</a>;
-      }
+      if (part.match(/(https?:\/\/[^\s]+(\.gif|\.jpg|\.jpeg|\.png|\.webp))/i)) return <img key={i} src={part} alt="" className="max-w-full rounded-lg mt-2 max-h-48 border border-slate-700/50 shadow-sm" />;
+      if (part.match(urlRegex)) return <a key={i} href={part} target="_blank" rel="noreferrer" className="text-blue-300 underline break-all">{part}</a>;
       return <span key={i} className="break-words">{part}</span>;
     });
   };
 
-  const handleAddParticipant = async () => {
-    if (!newParticipantName.trim()) return;
-    try {
-      const offlineId = crypto.randomUUID();
-      await setDoc(doc(poolDb, 'artifacts', poolId, 'public', 'data', 'participants', offlineId), {
-        name: newParticipantName.trim(), points: 0, cupPick: "", r1Correct: 0,
-        avatar: newParticipantName.substring(0, 2).toUpperCase(), picks: DEFAULT_PICKS,
-        uids: [] 
-      });
-      setNewParticipantName('');
-    } catch (err) { console.error(err); }
-  };
-
   const handleUpdateParticipant = async (id, field, value) => {
     try {
-      const val = (field === 'points' || field === 'r1Correct') ? Number(value) : value;
+      const val = (field === 'points') ? Number(value) : value;
       await updateDoc(doc(poolDb, 'artifacts', poolId, 'public', 'data', 'participants', id), { [field]: val });
-    } catch (err) { console.error(err); }
+    } catch (err) {}
   };
 
   const handleRemoveParticipant = async (id) => {
-    try { 
-      await deleteDoc(doc(poolDb, 'artifacts', poolId, 'public', 'data', 'participants', id)); 
-    } catch (err) { console.error(err); }
+    try { await deleteDoc(doc(poolDb, 'artifacts', poolId, 'public', 'data', 'participants', id)); } catch (err) {}
+  };
+
+  const handleUpdateLiveMatchup = async (mid, side, team) => {
+    const current = liveMatchups[mid] || { t1: '', t2: '' };
+    const update = { ...liveMatchups, [mid]: { ...current, [side]: team } };
+    setLiveMatchups(update);
+    try { await setDoc(doc(poolDb, 'artifacts', poolId, 'public', 'data', 'settings', 'matchups'), update); } catch (err) {}
   };
 
   const handleCopyLink = () => {
-    let shareUrl = window.location.href;
-    try { if (window.self !== window.top) shareUrl = document.referrer || window.location.href; } catch (e) { shareUrl = document.referrer || window.location.href; }
     const el = document.createElement('textarea');
-    el.value = shareUrl;
-    document.body.appendChild(el);
-    el.select();
-    document.execCommand('copy');
-    document.body.removeChild(el);
-    setCopySuccess(true);
-    setTimeout(() => setCopySuccess(false), 3000);
+    el.value = window.location.href;
+    document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el);
+    setCopySuccess(true); setTimeout(() => setCopySuccess(false), 3000);
   };
 
   const handleGenerateAnalysis = async (seriesId, t1, t2) => {
+    if (!t1 || !t2) return;
     setAiAnalysis(prev => ({ ...prev, [seriesId]: { loading: true, text: '' } }));
-    const t1Roster = TEAM_ROSTERS[t1]?.map(p => p.name).join(', ') || 'stars';
-    const t2Roster = TEAM_ROSTERS[t2]?.map(p => p.name).join(', ') || 'stars';
-    const text = await callGemini(`Analyze NHL series: ${t1} vs ${t2}. Mention ${t1Roster} and ${t2Roster}. Max 3 sentences, end with a prediction.`);
+    const text = await callGemini(`Analyze NHL series: ${t1} vs ${t2}. Max 3 sentences, end with a prediction.`);
     setAiAnalysis(prev => ({ ...prev, [seriesId]: { loading: false, text } }));
   };
 
   const handleGenerateTrashTalk = async (opponent) => {
     if (!user) return;
     setTrashTalk(prev => ({ ...prev, [opponent.id]: { loading: true, text: '' } }));
-    const myInfo = sortedParticipants.find(p => p.id === myParticipantId);
-    const text = await callGemini(`Write PG trash talk to ${opponent.name} (${opponent.points} pts, picked ${opponent.cupPick}). I have ${myInfo?.points || 0} pts. Max 2 sentences, no emojis.`);
+    const text = await callGemini(`Write PG trash talk to ${opponent.name}. Max 2 sentences, no emojis.`);
     setTrashTalk(prev => ({ ...prev, [opponent.id]: { loading: false, text } }));
   };
 
-  if (!isConfigured) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-slate-300">
-        <div className="bg-slate-900 border border-slate-800 p-8 rounded-2xl max-w-2xl w-full shadow-2xl">
-          <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-3">
-             <HockeyIcon name="AlertCircle" className="text-amber-500"/> Firebase Setup Required
-          </h2>
-          <p className="mb-4 text-sm text-slate-400">Exported apps require manual database keys. Follow these steps:</p>
-          <ol className="list-decimal ml-5 space-y-2 text-sm text-slate-300">
-            <li>Go to <a href="https://console.firebase.google.com/" target="_blank" rel="noreferrer" className="text-blue-400">Firebase Console</a></li>
-            <li>Enable <strong>Anonymous Auth</strong> and <strong>Firestore</strong> (Test Mode)</li>
-            <li>Paste your copied keys directly into the <code>FIREBASE_KEYS</code> object at the <strong>very top</strong> of the <code>App.jsx</code> file!</li>
-          </ol>
-        </div>
-      </div>
-    );
-  }
+  const getCombinedRoster = (t1, t2) => {
+    const r1 = TEAM_ROSTERS[t1] || [];
+    const r2 = TEAM_ROSTERS[t2] || [];
+    return [...r1, ...r2].sort((a, b) => a.name.localeCompare(b.name));
+  };
 
-  if (loadingAuth || (user && loadingData)) return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center text-blue-500 flex-col gap-4 font-bold">
-      <HockeyIcon name="Loader2" className="animate-spin w-12 h-12" /> Loading IcePool '26...
-    </div>
-  );
+  if (!isConfigured) return <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-slate-300"><div className="bg-slate-900 border border-slate-800 p-8 rounded-2xl shadow-2xl"><h2>Firebase Keys Missing</h2></div></div>;
+  if (loadingAuth || (user && loadingData)) return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-blue-500 flex-col gap-4 font-bold"><HockeyIcon name="Loader2" className="animate-spin w-12 h-12" /> Loading IcePool '26...</div>;
 
   if (user && !hasJoined) return (
     <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
       <div className="bg-slate-900 border border-slate-800 p-8 rounded-2xl max-w-md w-full text-center shadow-2xl">
-        <div className="bg-blue-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/20">
-          <HockeyIcon name="Goal" className="text-white w-8 h-8" />
-        </div>
+        <div className="bg-blue-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-blue-500/20"><HockeyIcon name="Goal" className="text-white w-8 h-8" /></div>
         <h2 className="text-2xl font-bold text-white mb-2">Welcome to IcePool '26</h2>
         <form onSubmit={handleJoinPool} className="flex flex-col gap-4 mt-6">
           <input type="text" placeholder="Display Name" value={newParticipantName} onChange={(e) => setNewParticipantName(e.target.value)} className="bg-slate-950 border border-slate-700 text-white rounded-xl px-4 py-3 text-center outline-none focus:border-blue-500"/>
-          <button type="submit" className="bg-blue-600 text-white px-6 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-transform active:scale-95"><HockeyIcon name="LogIn" /> Join Pool</button>
+          <button type="submit" className="bg-blue-600 text-white px-6 py-3.5 rounded-xl font-bold transition-transform active:scale-95">Join Pool</button>
           <p className="text-slate-400 text-xs italic mt-2">You can always change your display name later.</p>
         </form>
       </div>
@@ -570,48 +489,50 @@ function App() {
   );
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-slate-950 text-slate-100 font-sans">
+    <div className="flex flex-col md:flex-row min-h-screen bg-slate-950 text-slate-100 font-sans overflow-x-hidden">
       <nav className="fixed md:sticky bottom-0 md:top-0 w-full md:w-64 bg-slate-900 border-t md:border-t-0 md:border-r border-slate-800 z-50 h-16 md:h-screen flex flex-row md:flex-col p-2 md:p-6 justify-around md:justify-start">
-        <div className="hidden md:flex items-center gap-3 mb-10"><HockeyIcon name="Goal" className="text-blue-500" /><h1 className="text-xl font-bold tracking-tight">IcePool '26</h1></div>
+        <div className="hidden md:flex items-center gap-3 mb-10"><HockeyIcon name="Goal" className="text-blue-500" /><h1 className="text-xl font-bold">IcePool '26</h1></div>
         <div className="flex md:flex-col w-full gap-2">
-          <NavItem id="dashboard" icon={<HockeyIcon name="LayoutDashboard"/>} label="Dashboard" activeTab={activeTab} setActiveTab={setActiveTab} />
-          <NavItem id="mypicks" icon={<HockeyIcon name="Edit3"/>} label="My Picks" activeTab={activeTab} setActiveTab={setActiveTab} />
-          <NavItem id="leaderboard" icon={<HockeyIcon name="Trophy"/>} label="Leaderboard" activeTab={activeTab} setActiveTab={setActiveTab} />
-          <NavItem id="chat" icon={<HockeyIcon name="MessageSquare"/>} label="Locker Room" activeTab={activeTab} setActiveTab={setActiveTab} />
-          <NavItem id="live" icon={<HockeyIcon name="Activity"/>} label="Live Action" activeTab={activeTab} setActiveTab={setActiveTab} />
-          <div className="md:mt-auto hidden md:block border-t border-slate-800 pt-4" />
+          <NavItem id="dashboard" icon={<HockeyIcon name="LayoutDashboard"/>} label="Home" activeTab={activeTab} setActiveTab={setActiveTab} />
+          <NavItem id="mypicks" icon={<HockeyIcon name="Edit3"/>} label="Bracket" activeTab={activeTab} setActiveTab={setActiveTab} />
+          <NavItem id="leaderboard" icon={<HockeyIcon name="Trophy"/>} label="Standings" activeTab={activeTab} setActiveTab={setActiveTab} />
+          <NavItem id="chat" icon={<HockeyIcon name="MessageSquare"/>} label="Chat" activeTab={activeTab} setActiveTab={setActiveTab} />
           <NavItem id="manage" icon={<HockeyIcon name="Settings"/>} label="Settings" activeTab={activeTab} setActiveTab={setActiveTab} />
         </div>
       </nav>
 
-      <main className="flex-1 p-4 md:p-8 pb-24 w-full overflow-y-auto">
+      <main className="flex-1 p-4 md:p-8 pb-24 w-full">
         {activeTab === 'dashboard' && (
-          <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in duration-300">
+          <div className="max-w-6xl mx-auto space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-end gap-4">
-              <h2 className="text-3xl font-bold">Dashboard</h2>
-              <button onClick={handleCopyLink} className="flex items-center gap-2 bg-slate-800 px-4 py-2.5 rounded-lg font-bold border border-slate-700 hover:bg-slate-700 transition-colors">
-                <HockeyIcon name={copySuccess ? "CheckCircle2" : "Share2"} className={copySuccess ? 'text-green-400' : ''}/> {copySuccess ? 'Link Copied!' : 'Invite Friends'}
-              </button>
+              <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+              <button onClick={handleCopyLink} className="flex items-center gap-2 bg-slate-800 px-4 py-2.5 rounded-lg font-bold border border-slate-700 hover:bg-slate-700">{copySuccess ? 'Link Copied!' : 'Invite Friends'}</button>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div className="space-y-4">
-                <h3 className="text-xl font-bold flex items-center gap-2"><HockeyIcon name="Activity" className="text-red-500" /> Live Scores</h3>
+                <h3 className="text-xl font-bold flex items-center gap-2 text-slate-300"><HockeyIcon name="Activity" className="text-red-500" /> Live Scores</h3>
                 <div className="grid grid-cols-1 gap-4">
                   {liveGames.slice(0, 4).map(game => (
-                    <div key={game.id || Math.random()} className="bg-slate-800 rounded-xl p-4 border border-slate-700 shadow-sm">
-                      <div className="flex justify-between text-[10px] font-black text-slate-500 mb-2 uppercase tracking-widest"><span>{game.gameState}</span><span>{game.clock?.timeRemaining} {game.clock?.period ? `P${game.clock.period}` : ''}</span></div>
-                      <div className="flex justify-between items-center mb-1"><div className="flex items-center gap-2"><img src={getLogo(game.awayTeam.abbrev)} className="w-6 h-6 shadow-sm" alt=""/> <span className="font-bold text-slate-200">{game.awayTeam.abbrev}</span></div><span className="font-black text-xl">{game.awayTeam.score ?? '-'}</span></div>
-                      <div className="flex justify-between items-center"><div className="flex items-center gap-2"><img src={getLogo(game.homeTeam.abbrev)} className="w-6 h-6 shadow-sm" alt=""/> <span className="font-bold text-slate-200">{game.homeTeam.abbrev}</span></div><span className="font-black text-xl">{game.homeTeam.score ?? '-'}</span></div>
+                    <div key={game.id || Math.random()} className="bg-slate-800 rounded-xl p-4 border border-slate-700">
+                      <div className="flex justify-between text-[10px] font-black text-slate-500 uppercase"><span>{game.gameState}</span><span>{game.clock?.timeRemaining} {game.clock?.period ? `P${game.clock.period}` : ''}</span></div>
+                      <div className="flex justify-between items-center mt-2">
+                        <div className="flex items-center gap-2"><img src={getLogo(game.awayTeam.abbrev)} className="w-6 h-6" alt=""/> <span className="font-bold">{game.awayTeam.abbrev}</span></div>
+                        <span className="font-black text-xl">{game.awayTeam.score ?? '-'}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-2"><img src={getLogo(game.homeTeam.abbrev)} className="w-6 h-6" alt=""/> <span className="font-bold">{game.homeTeam.abbrev}</span></div>
+                        <span className="font-black text-xl">{game.homeTeam.score ?? '-'}</span>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
               <div className="space-y-4">
-                <h3 className="text-xl font-bold flex items-center gap-2"><HockeyIcon name="Trophy" className="text-yellow-500" /> Standings</h3>
+                <h3 className="text-xl font-bold text-slate-300">Pool Top 5</h3>
                 <div className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-sm">
-                  <table className="w-full text-left border-collapse"><tbody className="divide-y divide-slate-700">
+                  <table className="w-full text-left"><tbody className="divide-y divide-slate-700">
                     {sortedParticipants.slice(0, 5).map((u, i) => (
-                      <tr key={u.id} className="text-sm hover:bg-slate-700/30 transition-colors"><td className="p-4 w-10 text-center font-bold text-slate-500">{i+1}</td><td className="p-4 font-bold">{u.name}</td><td className="p-4 text-right font-black text-white">{u.points || 0}</td></tr>
+                      <tr key={u.id} className="text-sm"><td className="p-4 w-10 text-center font-bold text-slate-500">{i+1}</td><td className="p-4 font-bold">{u.name}</td><td className="p-4 text-right font-black">{u.points || 0}</td></tr>
                     ))}
                   </tbody></table>
                 </div>
@@ -621,51 +542,34 @@ function App() {
         )}
 
         {activeTab === 'chat' && (
-          <div className="max-w-6xl mx-auto space-y-4 animate-in fade-in duration-300 flex flex-col h-[calc(100vh-8rem)] md:h-[calc(100vh-4rem)]">
+          <div className="max-w-4xl mx-auto space-y-4 flex flex-col h-[calc(100vh-10rem)] md:h-[calc(100vh-6rem)]">
             <div className="flex justify-between items-end">
               <h2 className="text-3xl font-bold">Locker Room</h2>
-              <button onClick={toggleNotifications} className={`flex items-center gap-2 px-3 py-2 rounded-lg font-bold text-xs transition-colors border ${notificationsEnabled ? 'bg-blue-900/30 text-blue-400 border-blue-500/30 shadow-inner' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200 hover:bg-slate-700 shadow-sm'}`}>
-                <HockeyIcon name={notificationsEnabled ? 'Bell' : 'BellOff'} className="w-4 h-4" />
-                <span className="hidden sm:inline">{notificationsEnabled ? 'Notifs On' : 'Turn On Notifs'}</span>
+              <button onClick={toggleNotifications} className={`flex items-center gap-2 px-3 py-2 rounded-lg font-bold text-xs border ${notificationsEnabled ? 'bg-blue-900/30 text-blue-400 border-blue-500/30' : 'bg-slate-800 text-slate-400 border-slate-700'}`}>
+                <HockeyIcon name={notificationsEnabled ? 'Bell' : 'BellOff'} className="w-4 h-4" /> {notificationsEnabled ? 'Notifs On' : 'Notifs Off'}
               </button>
             </div>
-            
-            <div className="flex-1 bg-slate-900 border border-slate-700 rounded-2xl flex flex-col overflow-hidden shadow-xl relative">
+            <div className="flex-1 bg-slate-900 border border-slate-700 rounded-2xl flex flex-col overflow-hidden relative shadow-xl">
               <div className="flex-1 p-4 overflow-y-auto space-y-4">
-                {chatMessages.length === 0 && <div className="text-center text-slate-500 mt-10 italic">The locker room is quiet. Start the trash talk!</div>}
-                {chatMessages.map(msg => {
-                  const isMe = msg.uid === user?.uid;
-                  return (
-                    <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                      <span className="text-[10px] font-bold text-slate-500 mb-1 ml-1 tracking-wider uppercase">{msg.senderName}</span>
-                      <div className={`px-4 py-2.5 rounded-2xl max-w-[85%] md:max-w-[70%] text-sm leading-relaxed shadow-sm ${
-                        isMe ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-slate-800 text-slate-200 border border-slate-700 rounded-bl-sm'
-                      }`}>
-                        {renderMessageText(msg.text)}
-                      </div>
+                {chatMessages.map(msg => (
+                  <div key={msg.id} className={`flex flex-col ${msg.uid === user?.uid ? 'items-end' : 'items-start'}`}>
+                    <span className="text-[10px] font-bold text-slate-500 mb-1">{msg.senderName}</span>
+                    <div className={`px-4 py-2.5 rounded-2xl max-w-[85%] text-sm shadow-sm ${msg.uid === user?.uid ? 'bg-blue-600 text-white rounded-br-sm' : 'bg-slate-800 text-slate-200 border border-slate-700 rounded-bl-sm'}`}>
+                      {renderMessageText(msg.text)}
                     </div>
-                  )
-                })}
+                  </div>
+                ))}
                 <div ref={chatEndRef} />
               </div>
-              <div className="p-3 bg-slate-800 border-t border-slate-700 flex flex-col gap-2 relative">
-                {showGifs && (
-                  <div className="flex gap-2 overflow-x-auto pb-2 mb-2 no-scrollbar animate-in slide-in-from-bottom-2">
-                    {MOCK_GIFS.map((gif, idx) => (
-                      <img key={idx} src={gif} alt="gif option" onClick={() => { setNewMessage(gif); setShowGifs(false); }} className="h-20 w-auto cursor-pointer rounded-lg border-2 border-transparent hover:border-blue-500 transition-colors shadow-lg" />
-                    ))}
-                  </div>
-                )}
-                <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar items-center">
-                  <button type="button" onClick={() => setShowGifs(!showGifs)} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${showGifs ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>GIFs</button>
-                  <div className="w-px h-4 bg-slate-600 mx-1"></div>
-                  {['🏒', '🚨', '🥅', '🍻', '🗑️', '🤡', '🥶', '🔥'].map(emoji => (
-                    <button key={emoji} type="button" onClick={() => setNewMessage(prev => prev + emoji)} className="p-1 hover:bg-slate-700 rounded-lg text-xl transition-transform active:scale-90">{emoji}</button>
-                  ))}
+              <div className="p-3 bg-slate-800 border-t border-slate-700">
+                {showGifs && <div className="flex gap-2 overflow-x-auto pb-4">{MOCK_GIFS.map((gif, i) => <img key={i} src={gif} onClick={() => { setNewMessage(gif); setShowGifs(false); }} className="h-20 rounded-lg cursor-pointer hover:border-blue-500 border-2 border-transparent" alt=""/>)}</div>}
+                <div className="flex gap-2 items-center mb-2">
+                   <button onClick={() => setShowGifs(!showGifs)} className="text-xs font-bold px-3 py-1 bg-slate-700 rounded-lg">GIFs</button>
+                   {['🏒', '🚨', '🥅', '🍻'].map(e => <button key={e} onClick={() => setNewMessage(p => p + e)} className="p-1 text-xl">{e}</button>)}
                 </div>
                 <form onSubmit={handleSendMessage} className="flex gap-2">
-                  <input type="text" value={newMessage} onChange={e => setNewMessage(e.target.value)} placeholder="Talk some trash or paste an image link..." className="flex-1 bg-slate-950 border border-slate-700 text-white rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors"/>
-                  <button type="submit" disabled={!newMessage.trim()} className="bg-blue-600 text-white px-5 rounded-xl font-bold flex items-center justify-center transition-transform active:scale-95 disabled:opacity-50 disabled:active:scale-100 shadow-lg shadow-blue-500/20"><HockeyIcon name="MessageSquare" /></button>
+                  <input type="text" value={newMessage} onChange={e => setNewMessage(e.target.value)} placeholder="Send message..." className="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:border-blue-500"/>
+                  <button type="submit" disabled={!newMessage.trim()} className="bg-blue-600 text-white px-5 rounded-xl font-bold"><HockeyIcon name="MessageSquare" /></button>
                 </form>
               </div>
             </div>
@@ -673,157 +577,166 @@ function App() {
         )}
 
         {activeTab === 'mypicks' && (
-          <div className="space-y-6 animate-in fade-in duration-300 pb-12 w-full">
+          <div className="space-y-6 pb-24 w-full animate-in fade-in duration-300">
             <div className="max-w-6xl mx-auto flex justify-between items-end px-2">
-              <div>
-                <h2 className="text-3xl font-bold tracking-tight">Playoff Bracket</h2>
-                <p className="text-slate-500 text-xs mt-1">Scroll right to see future rounds.</p>
-              </div>
-              <button onClick={handleSavePicks} className="bg-blue-600 px-6 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-transform active:scale-95 shadow-lg shadow-blue-600/20">{saveSuccess ? <HockeyIcon name="CheckCircle2"/> : 'Save All'}</button>
+              <div><h2 className="text-3xl font-bold">Playoff Bracket</h2><p className="text-slate-500 text-xs mt-1">Pick series winners and star players for bonus points.</p></div>
+              <button onClick={handleSavePicks} className="bg-blue-600 px-6 py-2.5 rounded-lg font-bold flex items-center gap-2 shadow-lg shadow-blue-600/20">{saveSuccess ? <HockeyIcon name="CheckCircle2"/> : 'Save Picks'}</button>
             </div>
-
-            {/* Optimized Bracket Scroll Area */}
-            <div className="w-full overflow-x-auto overflow-y-visible pb-12 pt-4 px-4 scroll-smooth">
-              <div className="flex gap-8 md:gap-12 min-w-max">
+            
+            <div className="w-full overflow-x-auto pb-12 pt-4 px-4 scroll-smooth">
+              <div className="flex gap-8 md:gap-12 min-w-max items-start">
                 
                 {/* ROUND 1 */}
-                <div className="flex flex-col gap-8 w-56 md:w-64 shrink-0">
+                <div className="flex flex-col gap-10 w-64 md:w-72 shrink-0">
                   <div className="text-center font-black text-[10px] text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2">Round 1</div>
-                  {ROUND_MATCHUPS.r1.map(m => (
-                    <div key={m.id} className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-slate-700">
-                      <div className="bg-slate-800/50 p-2 border-b border-slate-800 flex justify-between items-center text-[10px] font-bold text-slate-500">
-                        <span>{m.region}</span>
-                        <button onClick={() => handleGenerateAnalysis(m.id, m.t1, m.t2)} className="text-amber-500 uppercase text-[9px] hover:text-amber-400 font-black">✨ AI Analyst</button>
-                      </div>
-                      {['t1', 't2'].map(key => {
-                        const team = m[key];
-                        const isWinner = myPicks.series?.[m.id]?.winner === team;
-                        return (
-                          <button key={team} onClick={() => handleSeriesPick(m.id, 'winner', team)} className={`w-full flex items-center gap-3 p-3 transition-all ${isWinner ? 'bg-blue-600/20 text-white' : 'hover:bg-slate-800 text-slate-400'}`}>
+                  {ROUND_MATCHUPS_STRUCTURE.r1.map(m => {
+                    const t1 = liveMatchups[m.id]?.t1 || m.defaultTeams.t1;
+                    const t2 = liveMatchups[m.id]?.t2 || m.defaultTeams.t2;
+                    const currentPick = myPicks.series?.[m.id] || {};
+                    const isWinner = currentPick.winner;
+                    const roster = getCombinedRoster(t1, t2);
+
+                    return (
+                      <div key={m.id} className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-slate-700">
+                        <div className="bg-slate-800/50 p-2 border-b border-slate-800 flex justify-between items-center text-[10px] font-bold text-slate-500">
+                          <span>{m.region}</span>
+                          <button onClick={() => handleGenerateAnalysis(m.id, t1, t2)} className="text-amber-500 uppercase text-[9px] font-black">✨ Analysis</button>
+                        </div>
+                        {[t1, t2].map(team => (
+                          <button key={team} onClick={() => handleSeriesPick(m.id, 'winner', team)} className={`w-full flex items-center gap-3 p-3 transition-all ${isWinner === team ? 'bg-blue-600/20 text-white' : 'hover:bg-slate-800 text-slate-400'}`}>
                             <img src={getLogo(team)} className="w-6 h-6 shrink-0" alt=""/>
-                            <span className={`text-sm font-bold ${isWinner ? 'text-blue-400' : ''}`}>{team}</span>
-                            {isWinner && <HockeyIcon name="CheckCircle2" className="ml-auto w-4 h-4 text-blue-400" />}
+                            <span className="text-sm font-bold">{team}</span>
+                            {isWinner === team && <HockeyIcon name="CheckCircle2" className="ml-auto w-4 h-4 text-blue-400" />}
                           </button>
-                        );
-                      })}
-                    </div>
-                  ))}
+                        ))}
+                        <div className="p-3 bg-slate-950/40 space-y-2 border-t border-slate-800/50">
+                          <div className="space-y-1">
+                            <label className="text-[9px] uppercase font-black text-slate-500 block ml-1">Series Goal Leader</label>
+                            <select value={currentPick.topGoalScorer || ''} onChange={(e) => handleSeriesPick(m.id, 'topGoalScorer', e.target.value)} className="w-full bg-slate-900 text-[10px] p-2 rounded text-slate-300 outline-none border border-slate-800 focus:border-blue-500">
+                              <option value="">Select Player...</option>
+                              {roster.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
+                            </select>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] uppercase font-black text-slate-500 block ml-1">Series Point Leader</label>
+                            <select value={currentPick.topPointScorer || ''} onChange={(e) => handleSeriesPick(m.id, 'topPointScorer', e.target.value)} className="w-full bg-slate-900 text-[10px] p-2 rounded text-slate-300 outline-none border border-slate-800 focus:border-blue-500">
+                              <option value="">Select Player...</option>
+                              {roster.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
 
                 {/* ROUND 2 */}
-                <div className="flex flex-col gap-8 w-56 md:w-64 justify-around shrink-0">
+                <div className="flex flex-col gap-10 w-64 md:w-72 justify-around shrink-0 h-full py-16">
                   <div className="text-center font-black text-[10px] text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2">Round 2</div>
-                  {ROUND_MATCHUPS.r2.map(m => (
-                    <div key={m.id} className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-blue-900/50">
-                      <div className="bg-slate-800/50 p-2 border-b border-slate-800 text-[10px] font-bold text-slate-500">{m.region} Semis</div>
-                      {['p1', 'p2'].map((field, idx) => {
-                        const pool = idx === 0 ? m.poolT1 : m.poolT2;
-                        const selected = myPicks.series?.[m.id]?.[field] || '';
-                        const isWinner = myPicks.series?.[m.id]?.winner === selected && selected !== '';
-                        return (
-                          <div key={field} className="flex items-center gap-1 p-1 bg-slate-950/20">
-                            <select 
-                              value={selected} 
-                              onChange={(e) => handleSeriesPick(m.id, field, e.target.value)} 
-                              className="flex-1 bg-slate-900 text-xs font-bold p-2 text-slate-300 rounded outline-none border border-slate-800 focus:border-blue-500 cursor-pointer"
-                            >
-                              <option value="">Select Team...</option>
-                              {pool.map(t => <option key={t} value={t}>{t}</option>)}
-                            </select>
-                            <button 
-                              disabled={!selected}
-                              onClick={() => handleSeriesPick(m.id, 'winner', selected)}
-                              className={`p-2 rounded transition-all ${isWinner ? 'text-blue-400' : 'text-slate-700 hover:text-slate-500'}`}
-                            >
-                              <HockeyIcon name="CheckCircle2" className="w-5 h-5" />
-                            </button>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  ))}
+                  {ROUND_MATCHUPS_STRUCTURE.r2.map(m => {
+                    const currentPick = myPicks.series?.[m.id] || {};
+                    const roster = getCombinedRoster(currentPick.p1, currentPick.p2);
+                    return (
+                      <div key={m.id} className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-blue-900/50">
+                        <div className="bg-slate-800/50 p-2 border-b border-slate-800 text-[10px] font-bold text-slate-500 uppercase tracking-tighter">Round 2: {m.region}</div>
+                        {['p1', 'p2'].map((field, idx) => {
+                          const team = currentPick[field] || '';
+                          const isWinner = currentPick.winner === team && team !== '';
+                          return (
+                            <div key={field} className="flex items-center gap-1 p-1.5 bg-slate-950/20 border-b border-slate-800 last:border-0">
+                              <select value={team} onChange={(e) => handleSeriesPick(m.id, field, e.target.value)} className="flex-1 bg-slate-900 text-[10px] font-bold p-2 text-slate-300 rounded outline-none border border-slate-800 focus:border-blue-500">
+                                <option value="">Select Team...</option>
+                                {(idx === 0 ? m.poolT1 : m.poolT2).map(t => <option key={t} value={t}>{t}</option>)}
+                              </select>
+                              <button disabled={!team} onClick={() => handleSeriesPick(m.id, 'winner', team)} className={`p-1.5 rounded transition-colors ${isWinner ? 'text-blue-400' : 'text-slate-700 hover:text-slate-500'}`}><HockeyIcon name="CheckCircle2" className="w-5 h-5" /></button>
+                            </div>
+                          )
+                        })}
+                        <div className="p-3 bg-slate-950/40 space-y-2">
+                           <select value={currentPick.topGoalScorer || ''} disabled={!currentPick.p1 || !currentPick.p2} onChange={(e) => handleSeriesPick(m.id, 'topGoalScorer', e.target.value)} className="w-full bg-slate-900 text-[9px] p-2 rounded text-slate-300 outline-none border border-slate-800 focus:border-blue-500">
+                              <option value="">Round 2 Goal Leader...</option>
+                              {roster.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
+                           </select>
+                           <select value={currentPick.topPointScorer || ''} disabled={!currentPick.p1 || !currentPick.p2} onChange={(e) => handleSeriesPick(m.id, 'topPointScorer', e.target.value)} className="w-full bg-slate-900 text-[9px] p-2 rounded text-slate-300 outline-none border border-slate-800 focus:border-blue-500">
+                              <option value="">Round 2 Point Leader...</option>
+                              {roster.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
+                           </select>
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
 
                 {/* CONFERENCE FINALS (ROUND 3) */}
-                <div className="flex flex-col gap-8 w-56 md:w-64 justify-around shrink-0">
+                <div className="flex flex-col gap-10 w-64 md:w-72 justify-around shrink-0 h-full py-32">
                   <div className="text-center font-black text-[10px] text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2">Conference Finals</div>
-                  {ROUND_MATCHUPS.r3.map(m => (
-                    <div key={m.id} className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-blue-700">
-                      <div className="bg-slate-800/50 p-2 border-b border-slate-800 text-[10px] font-bold text-slate-500">{m.region} Finals</div>
-                      {['p1', 'p2'].map((field, idx) => {
-                        const pool = idx === 0 ? m.poolT1 : m.poolT2;
-                        const selected = myPicks.series?.[m.id]?.[field] || '';
-                        const isWinner = myPicks.series?.[m.id]?.winner === selected && selected !== '';
-                        return (
-                          <div key={field} className="flex items-center gap-1 p-2 bg-slate-950/20">
-                            <select 
-                              value={selected} 
-                              onChange={(e) => handleSeriesPick(m.id, field, e.target.value)} 
-                              className="flex-1 bg-slate-900 text-xs font-bold p-2.5 text-slate-300 rounded outline-none border border-slate-800 focus:border-blue-500 cursor-pointer"
-                            >
-                              <option value="">Select Team...</option>
-                              {pool.map(t => <option key={t} value={t}>{t}</option>)}
-                            </select>
-                            <button 
-                              disabled={!selected}
-                              onClick={() => handleSeriesPick(m.id, 'winner', selected)}
-                              className={`p-2 rounded transition-all ${isWinner ? 'text-blue-400' : 'text-slate-700 hover:text-slate-500'}`}
-                            >
-                              <HockeyIcon name="CheckCircle2" className="w-6 h-6" />
-                            </button>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  ))}
+                  {ROUND_MATCHUPS_STRUCTURE.r3.map(m => {
+                    const currentPick = myPicks.series?.[m.id] || {};
+                    const roster = getCombinedRoster(currentPick.p1, currentPick.p2);
+                    return (
+                      <div key={m.id} className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-blue-700">
+                        <div className="bg-slate-800/50 p-2 border-b border-slate-800 text-[10px] font-bold text-slate-500">{m.region} Final</div>
+                        {['p1', 'p2'].map((field, idx) => {
+                          const team = currentPick[field] || '';
+                          const isWinner = currentPick.winner === team && team !== '';
+                          return (
+                            <div key={field} className="flex items-center gap-1 p-2 bg-slate-950/20 border-b border-slate-800 last:border-0">
+                              <select value={team} onChange={(e) => handleSeriesPick(m.id, field, e.target.value)} className="flex-1 bg-slate-900 text-[10px] font-bold p-2 text-slate-300 rounded outline-none">
+                                <option value="">Select Team...</option>
+                                {(idx === 0 ? m.poolT1 : m.poolT2).map(t => <option key={t} value={t}>{t}</option>)}
+                              </select>
+                              <button disabled={!team} onClick={() => handleSeriesPick(m.id, 'winner', team)} className={`p-1.5 rounded ${isWinner ? 'text-blue-400' : 'text-slate-700'}`}><HockeyIcon name="CheckCircle2" className="w-5 h-5" /></button>
+                            </div>
+                          )
+                        })}
+                        <div className="p-3 bg-slate-950/40 space-y-2">
+                           <select value={currentPick.topGoalScorer || ''} disabled={!currentPick.p1 || !currentPick.p2} onChange={(e) => handleSeriesPick(m.id, 'topGoalScorer', e.target.value)} className="w-full bg-slate-900 text-[9px] p-2 rounded text-slate-300 outline-none">
+                              <option value="">R3 Goal Leader...</option>
+                              {roster.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
+                           </select>
+                           <select value={currentPick.topPointScorer || ''} disabled={!currentPick.p1 || !currentPick.p2} onChange={(e) => handleSeriesPick(m.id, 'topPointScorer', e.target.value)} className="w-full bg-slate-900 text-[9px] p-2 rounded text-slate-300 outline-none">
+                              <option value="">R3 Point Leader...</option>
+                              {roster.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
+                           </select>
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
 
                 {/* CUP FINAL */}
-                <div className="flex flex-col w-64 md:w-80 justify-center shrink-0">
+                <div className="flex flex-col w-64 md:w-80 justify-center shrink-0 h-full pt-48">
                   <div className="text-center font-black text-[10px] text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2 mb-4">Stanley Cup Final</div>
-                  {ROUND_MATCHUPS.r4.map(m => {
-                    const winner = myPicks.series?.[m.id]?.winner || '';
+                  {ROUND_MATCHUPS_STRUCTURE.r4.map(m => {
+                    const currentPick = myPicks.series?.[m.id] || {};
+                    const roster = getCombinedRoster(currentPick.p1, currentPick.p2);
+                    const winner = currentPick.winner || '';
                     return (
                       <div key={m.id} className="space-y-4">
                         <div className="bg-slate-900 border border-blue-600/30 rounded-2xl overflow-hidden shadow-2xl relative">
                           <div className="bg-slate-800/80 p-3 flex justify-center"><HockeyIcon name="Trophy" className="text-yellow-500 w-10 h-10 animate-pulse"/></div>
                           {['p1', 'p2'].map((field, idx) => {
-                            const pool = idx === 0 ? m.poolT1 : m.poolT2;
-                            const selected = myPicks.series?.[m.id]?.[field] || '';
-                            const isWinner = winner === selected && selected !== '';
+                            const team = currentPick[field] || '';
+                            const isWinner = winner === team && team !== '';
                             return (
                               <div key={field} className="flex items-center gap-3 p-4 bg-slate-950/10 border-b border-slate-800 last:border-0">
-                                <select 
-                                  value={selected} 
-                                  onChange={(e) => handleSeriesPick(m.id, field, e.target.value)} 
-                                  className="flex-1 bg-slate-950 text-base font-black p-3 text-white rounded-lg border border-slate-700 focus:border-yellow-500 outline-none cursor-pointer"
-                                >
-                                  <option value="">Select Champion...</option>
-                                  {pool.map(t => <option key={t} value={t}>{t}</option>)}
+                                <select value={team} onChange={(e) => handleSeriesPick(m.id, field, e.target.value)} className="flex-1 bg-slate-950 text-sm font-black p-3 text-white rounded-lg border border-slate-700 focus:border-yellow-500 outline-none">
+                                  <option value="">Select Team...</option>
+                                  {(idx === 0 ? m.poolT1 : m.poolT2).map(t => <option key={t} value={t}>{t}</option>)}
                                 </select>
-                                <button 
-                                  disabled={!selected}
-                                  onClick={() => { 
-                                    handleSeriesPick(m.id, 'winner', selected);
-                                    setMyPicks(prev => ({ ...prev, cupWinner: selected }));
-                                  }}
-                                  className={`p-3 rounded-full transition-all ${isWinner ? 'bg-yellow-500 text-slate-900' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
-                                >
-                                  <HockeyIcon name="Trophy" className="w-6 h-6" />
-                                </button>
+                                <button disabled={!team} onClick={() => { handleSeriesPick(m.id, 'winner', team); setMyPicks(p => ({ ...p, cupWinner: team })); }} className={`p-3 rounded-full ${isWinner ? 'bg-yellow-500 text-slate-900' : 'bg-slate-800 text-slate-500'}`}><HockeyIcon name="Trophy" className="w-5 h-5" /></button>
                               </div>
                             )
                           })}
-                        </div>
-                        
-                        {winner && (
-                          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-5 text-center animate-in zoom-in duration-500 shadow-lg">
-                            <div className="text-[10px] font-black text-yellow-500 uppercase mb-1">Your 2026 Champion</div>
-                            <div className="text-3xl font-black text-white flex items-center justify-center gap-3">
-                               <img src={getLogo(winner)} className="w-10 h-10 drop-shadow-lg" alt=""/> {winner}
-                            </div>
+                          <div className="p-4 bg-slate-950/40 space-y-2">
+                             <label className="text-[10px] font-black text-slate-500 uppercase block ml-1">Finals Star Pick</label>
+                             <select value={currentPick.topPointScorer || ''} disabled={!currentPick.p1 || !currentPick.p2} onChange={(e) => handleSeriesPick(m.id, 'topPointScorer', e.target.value)} className="w-full bg-slate-900 text-xs p-3 rounded-lg text-white border border-slate-700">
+                                <option value="">Conn Smythe Pick...</option>
+                                {roster.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
+                             </select>
                           </div>
-                        )}
+                        </div>
+                        {winner && <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-5 text-center shadow-lg animate-in zoom-in duration-300"><div className="text-[10px] font-black text-yellow-500 uppercase mb-1">Your 2026 Champion</div><div className="text-2xl font-black text-white flex items-center justify-center gap-3"><img src={getLogo(winner)} className="w-8 h-8" alt=""/> {winner}</div></div>}
                       </div>
                     );
                   })}
@@ -835,28 +748,28 @@ function App() {
         )}
 
         {activeTab === 'leaderboard' && (
-          <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in duration-300">
-            <h2 className="text-3xl font-bold">Leaderboard</h2>
+          <div className="max-w-6xl mx-auto space-y-6">
+            <h2 className="text-3xl font-bold">Standings</h2>
             <div className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-2xl">
-              <table className="w-full text-left border-collapse">
+              <table className="w-full text-left">
                 <thead className="bg-slate-900 text-[10px] text-slate-400 uppercase tracking-widest border-b border-slate-700">
-                  <tr><th className="p-4 w-12 text-center font-black">Rk</th><th className="p-4 font-black">Participant</th><th className="p-4 font-black">Cup Pick</th><th className="p-4 text-right font-black">Points</th></tr>
+                  <tr><th className="p-4 w-12 text-center">Rk</th><th className="p-4">Participant</th><th className="p-4">Cup Pick</th><th className="p-4 text-right">Points</th></tr>
                 </thead>
                 <tbody className="divide-y divide-slate-700">
                   {sortedParticipants.map((u, i) => (
                     <Fragment key={u.id}>
-                      <tr className="hover:bg-slate-700/20 transition-colors group">
+                      <tr className="hover:bg-slate-700/20 group transition-colors">
                         <td className="p-4 text-center font-bold text-slate-500">{i+1}</td>
                         <td className="p-4 font-bold text-slate-200">{u.name}</td>
-                        <td className="p-4 text-sm text-slate-400"><div className="flex items-center gap-2">{u.cupPick && <img src={getLogo(u.cupPick)} className="w-5 h-5 shadow-sm" alt=""/>} {u.cupPick || '-'}</div></td>
+                        <td className="p-4 text-sm text-slate-400"><div className="flex items-center gap-2">{u.cupPick && <img src={getLogo(u.cupPick)} className="w-5 h-5" alt=""/>} {u.cupPick || '-'}</div></td>
                         <td className="p-4 text-right">
                           <div className="flex flex-col items-end gap-1">
-                            <span className="font-black text-xl text-white tracking-tighter">{u.points || 0}</span>
-                            {u.id !== myParticipantId && <button onClick={() => handleGenerateTrashTalk(u)} className="text-[10px] font-black text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded hover:bg-blue-500/20 transition-all active:scale-95 opacity-0 group-hover:opacity-100 focus:opacity-100">✨ CHIRP</button>}
+                            <span className="font-black text-xl text-white">{u.points || 0}</span>
+                            {u.id !== myParticipantId && <button onClick={() => handleGenerateTrashTalk(u)} className="text-[9px] font-black text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">✨ Chirp</button>}
                           </div>
                         </td>
                       </tr>
-                      {trashTalk[u.id]?.text && <tr className="bg-blue-900/10 text-xs italic text-blue-200"><td colSpan="4" className="p-3 px-12 border-l-4 border-blue-500 shadow-inner">"{trashTalk[u.id].text}"</td></tr>}
+                      {trashTalk[u.id]?.text && <tr className="bg-blue-900/10 text-xs italic text-blue-200"><td colSpan="4" className="p-3 px-12 border-l-4 border-blue-500">"{trashTalk[u.id].text}"</td></tr>}
                     </Fragment>
                   ))}
                 </tbody>
@@ -869,67 +782,69 @@ function App() {
           <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in duration-300">
             <h2 className="text-3xl font-bold">Settings</h2>
             <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg">
-              <h3 className="font-bold mb-4 flex items-center gap-2 text-slate-200"><HockeyIcon name="Edit3" className="text-blue-400"/> Change My Name</h3>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <input type="text" placeholder="Update your name..." value={updateNameInput} onChange={(e) => setUpdateNameInput(e.target.value)} className="bg-slate-950 flex-1 p-3 rounded-lg outline-none border border-slate-800 focus:border-blue-500 transition-colors text-white"/>
-                <button onClick={() => { if(updateNameInput.trim()) { handleUpdateParticipant(myParticipantId, 'name', updateNameInput.trim()); setSaveSuccess(true); setTimeout(() => setSaveSuccess(false), 3000); } }} className="bg-blue-600 px-6 py-3 sm:py-0 font-bold rounded-lg hover:bg-blue-500 transition-colors active:scale-95 shadow-lg flex justify-center items-center gap-2">{saveSuccess ? <HockeyIcon name="CheckCircle2"/> : 'Save'}</button>
+              <h3 className="font-bold mb-4 flex items-center gap-2 text-slate-200"><HockeyIcon name="Edit3" className="text-blue-400"/> My Display Name</h3>
+              <div className="flex gap-2">
+                <input type="text" value={updateNameInput} onChange={(e) => setUpdateNameInput(e.target.value)} className="bg-slate-950 flex-1 p-3 rounded-lg outline-none border border-slate-800 focus:border-blue-500 text-white"/>
+                <button onClick={() => { if(updateNameInput.trim()) { handleUpdateParticipant(myParticipantId, 'name', updateNameInput.trim()); setSaveSuccess(true); setTimeout(() => setSaveSuccess(false), 2000); } }} className="bg-blue-600 px-6 font-bold rounded-lg">{saveSuccess ? <HockeyIcon name="CheckCircle2"/> : 'Save'}</button>
               </div>
             </div>
-            <div className="pt-4 border-t border-slate-800/80">
-              {!isAdmin ? (
-                <div className="bg-slate-800/30 p-6 rounded-2xl border border-slate-700/50 flex flex-col sm:flex-row gap-4 items-center justify-between">
-                  <div>
-                    <h3 className="font-bold text-slate-300 flex items-center gap-2"><HockeyIcon name="Settings" className="text-slate-500"/> Admin Access</h3>
-                    <p className="text-xs text-slate-500 mt-1">Enter PIN to manage participants and pool points.</p>
-                  </div>
-                  <div className="flex gap-2 w-full sm:w-auto">
-                    <input type="password" placeholder="Admin PIN" value={adminPasswordInput} onChange={(e) => setAdminPasswordInput(e.target.value)} onKeyDown={(e) => { if(e.key === 'Enter' && adminPasswordInput === 'admin') { setIsAdmin(true); setAdminPasswordInput(''); } }} className="bg-slate-950 p-2.5 rounded-lg border border-slate-700 text-white outline-none focus:border-amber-500 w-full sm:w-32"/>
-                    <button onClick={() => { if(adminPasswordInput === 'admin') { setIsAdmin(true); setAdminPasswordInput(''); } }} className="bg-slate-700 hover:bg-slate-600 px-4 py-2.5 rounded-lg font-bold transition-colors text-sm">Unlock</button>
+            {!isAdmin ? (
+              <div className="bg-slate-800/30 p-6 rounded-2xl border border-slate-700/50 flex flex-col sm:flex-row gap-4 items-center justify-between">
+                <div><h3 className="font-bold text-slate-300 flex items-center gap-2"><HockeyIcon name="Settings" className="text-slate-500"/> Admin Access</h3><p className="text-xs text-slate-500">Manage Matchups & Scoring</p></div>
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <input type="password" placeholder="PIN" value={adminPasswordInput} onChange={(e) => setAdminPasswordInput(e.target.value)} className="bg-slate-950 p-2.5 rounded-lg border border-slate-700 text-white w-full sm:w-32"/>
+                  <button onClick={() => { if(adminPasswordInput === 'admin') { setIsAdmin(true); setAdminPasswordInput(''); } }} className="bg-slate-700 px-4 py-2.5 rounded-lg font-bold transition-colors">Unlock</button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-8 pb-20">
+                <div className="bg-amber-500/10 border border-amber-500/20 p-6 rounded-2xl flex justify-between items-center">
+                   <h3 className="text-xl font-bold text-amber-500">Admin Control Zone</h3>
+                   <button onClick={() => setIsAdmin(false)} className="bg-slate-800 px-4 py-2 rounded-lg text-xs font-bold transition-colors">Lock Zone</button>
+                </div>
+
+                <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg">
+                  <h3 className="font-bold mb-4 text-slate-200">Manage Round 1 Matchups</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {ROUND_MATCHUPS_STRUCTURE.r1.map(m => (
+                      <div key={m.id} className="bg-slate-900 p-3 rounded-xl border border-slate-800">
+                        <div className="text-[10px] font-bold text-blue-400 uppercase mb-2">Series {m.id} ({m.region})</div>
+                        <div className="space-y-2">
+                           <select value={liveMatchups[m.id]?.t1 || ''} onChange={(e) => handleUpdateLiveMatchup(m.id, 't1', e.target.value)} className="w-full bg-slate-800 p-1.5 rounded text-xs text-slate-300 outline-none">
+                             <option value="">Seed 1</option>
+                             {TEAMS.map(t => <option key={t} value={t}>{t}</option>)}
+                           </select>
+                           <select value={liveMatchups[m.id]?.t2 || ''} onChange={(e) => handleUpdateLiveMatchup(m.id, 't2', e.target.value)} className="w-full bg-slate-800 p-1.5 rounded text-xs text-slate-300 outline-none">
+                             <option value="">Seed 2</option>
+                             {TEAMS.map(t => <option key={t} value={t}>{t}</option>)}
+                           </select>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ) : (
-                <div className="space-y-6 animate-in fade-in duration-300">
-                  <div className="flex justify-between items-center bg-amber-500/10 border border-amber-500/20 p-4 rounded-xl">
-                    <h3 className="text-lg font-bold text-amber-500 flex items-center gap-2"><HockeyIcon name="AlertCircle" /> Admin Zone Unlocked</h3>
-                    <button onClick={() => setIsAdmin(false)} className="text-xs bg-slate-800 px-4 py-2 rounded-lg hover:bg-slate-700 text-slate-300 font-bold transition-colors">Lock Zone</button>
-                  </div>
-                  <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg">
-                    <h3 className="font-bold mb-4 flex items-center gap-2 text-slate-200"><HockeyIcon name="Users" className="text-blue-400"/> Add Participant (Manual Entry)</h3>
-                    <div className="flex gap-2">
-                      <input type="text" placeholder="Enter name..." value={newParticipantName} onChange={(e) => setNewParticipantName(e.target.value)} className="bg-slate-950 flex-1 p-3 rounded-lg outline-none border border-slate-800 focus:border-blue-500 transition-colors text-white"/>
-                      <button onClick={handleAddParticipant} className="bg-blue-600 px-6 font-bold rounded-lg hover:bg-blue-500 transition-colors active:scale-95 shadow-lg">Add</button>
-                    </div>
-                  </div>
-                  <div className="bg-slate-800 rounded-2xl border border-slate-700 overflow-x-auto shadow-xl">
-                    <table className="w-full text-left min-w-[600px] border-collapse"><tbody className="divide-y divide-slate-700">
-                      {participants.map(p => (
-                        <tr key={p.id} className="hover:bg-slate-700/20 transition-colors">
-                          <td className="p-4 font-bold text-slate-200">{p.name}</td>
-                          <td className="p-4">
-                            <div className="flex items-center gap-2 text-xs text-slate-500 font-bold uppercase tracking-tight">Pts: 
-                              <input type="number" value={p.points} onChange={(e) => handleUpdateParticipant(p.id, 'points', e.target.value)} className="bg-slate-950 p-2 rounded w-20 text-center border border-slate-800 text-slate-100 font-black focus:border-blue-500 outline-none"/>
-                            </div>
-                          </td>
-                          <td className="p-4 text-right">
-                            {deleteConfirmId === p.id ? (
-                              <div className="flex justify-end gap-2">
-                                <button onClick={() => setDeleteConfirmId(null)} className="text-xs text-slate-400 hover:text-white px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 font-bold">Cancel</button>
-                                <button onClick={() => { handleRemoveParticipant(p.id); setDeleteConfirmId(null); }} className="text-xs text-white bg-red-600 px-3 py-1.5 rounded-lg hover:bg-red-500 font-bold">Confirm</button>
-                              </div>
-                            ) : (
-                              <button onClick={() => setDeleteConfirmId(p.id)} className="text-slate-500 hover:text-red-500 transition-all p-2 rounded-lg hover:bg-red-500/10"><HockeyIcon name="Trash2"/></button>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                      {participants.length === 0 && (
-                        <tr><td colSpan="3" className="p-12 text-center text-slate-500 italic font-medium">No participants found in database. Share your link to start!</td></tr>
-                      )}
-                    </tbody></table>
+
+                <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg">
+                  <h3 className="font-bold mb-4 text-slate-200">Participant Scoring</h3>
+                  <div className="bg-slate-900 rounded-xl overflow-hidden overflow-x-auto">
+                    <table className="w-full text-left">
+                      <thead className="bg-slate-950 text-[10px] text-slate-500 uppercase font-black"><tr className="border-b border-slate-800"><th className="p-4">Name</th><th className="p-4">Points</th><th className="p-4 text-right">Actions</th></tr></thead>
+                      <tbody className="divide-y divide-slate-800">
+                        {participants.map(p => (
+                          <tr key={p.id} className="text-sm">
+                            <td className="p-4 font-bold">{p.name}</td>
+                            <td className="p-4"><input type="number" value={p.points} onChange={(e) => handleUpdateParticipant(p.id, 'points', e.target.value)} className="bg-slate-950 p-1.5 rounded w-20 text-center text-blue-400 font-bold border border-slate-800 outline-none"/></td>
+                            <td className="p-4 text-right">
+                               {deleteConfirmId === p.id ? <button onClick={() => handleRemoveParticipant(p.id)} className="bg-red-600 px-3 py-1 rounded-lg font-bold text-xs">Confirm</button> : <button onClick={() => setDeleteConfirmId(p.id)} className="text-slate-500 hover:text-red-500 p-2"><HockeyIcon name="Trash2"/></button>}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         )}
       </main>
