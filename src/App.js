@@ -50,7 +50,7 @@ const HockeyIcon = ({ name, className = "" }) => {
   if (name === 'Calendar') return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>;
   if (name === 'Medal') return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}><path d="M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15"/><path d="M11 12 5.12 2.2"/><path d="m13 12 5.88-9.8"/><path d="M8 7h8"/><circle cx="12" cy="17" r="5"/><polyline points="12 18 13 16 14 17"/></svg>;
   if (name === 'LayoutDashboard') return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>;
-  if (name === 'Settings') return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
+  if (name === 'Settings') return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
   if (name === 'Plus') return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>;
   if (name === 'Trash2') return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>;
   if (name === 'Loader2') return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={mergedClassName}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>;
@@ -111,21 +111,46 @@ const callGemini = async (prompt) => {
 
 // --- Static Data ---
 const TEAMS = ["NYR", "WSH", "CAR", "NYI", "FLA", "TBL", "BOS", "TOR", "DAL", "VGK", "WPG", "COL", "VAN", "NSH", "EDM", "LAK"];
+const EAST_TEAMS = ["NYR", "WSH", "CAR", "NYI", "FLA", "TBL", "BOS", "TOR"];
+const WEST_TEAMS = ["DAL", "VGK", "WPG", "COL", "VAN", "NSH", "EDM", "LAK"];
+
 const getLogo = (abbrev) => `https://assets.nhle.com/logos/nhl/svg/${abbrev}_light.svg`;
 
-const MOCK_MATCHUPS = [
-  { id: 'E1', t1: 'NYR', t2: 'WSH', region: 'East' },
-  { id: 'E2', t1: 'FLA', t2: 'TBL', region: 'East' },
-  { id: 'E3', t1: 'CAR', t2: 'NYI', region: 'East' },
-  { id: 'E4', t1: 'BOS', t2: 'TOR', region: 'East' },
-  { id: 'W1', t1: 'DAL', t2: 'VGK', region: 'West' },
-  { id: 'W2', t1: 'VAN', t2: 'NSH', region: 'West' },
-  { id: 'W3', t1: 'WPG', t2: 'COL', region: 'West' },
-  { id: 'W4', t1: 'EDM', t2: 'LAK', region: 'West' },
+const ROUND_MATCHUPS = {
+  r1: [
+    { id: 'E1', t1: 'NYR', t2: 'WSH', region: 'East', poolT1: ['NYR'], poolT2: ['WSH'] },
+    { id: 'E2', t1: 'FLA', t2: 'TBL', region: 'East', poolT1: ['FLA'], poolT2: ['TBL'] },
+    { id: 'E3', t1: 'CAR', t2: 'NYI', region: 'East', poolT1: ['CAR'], poolT2: ['NYI'] },
+    { id: 'E4', t1: 'BOS', t2: 'TOR', region: 'East', poolT1: ['BOS'], poolT2: ['TOR'] },
+    { id: 'W1', t1: 'DAL', t2: 'VGK', region: 'West', poolT1: ['DAL'], poolT2: ['VGK'] },
+    { id: 'W2', t1: 'VAN', t2: 'NSH', region: 'West', poolT1: ['VAN'], poolT2: ['NSH'] },
+    { id: 'W3', t1: 'WPG', t2: 'COL', region: 'West', poolT1: ['WPG'], poolT2: ['COL'] },
+    { id: 'W4', t1: 'EDM', t2: 'LAK', region: 'West', poolT1: ['EDM'], poolT2: ['LAK'] },
+  ],
+  r2: [
+    { id: 'ES1', region: 'East', poolT1: ['NYR', 'WSH'], poolT2: ['FLA', 'TBL'] },
+    { id: 'ES2', region: 'East', poolT1: ['CAR', 'NYI'], poolT2: ['BOS', 'TOR'] },
+    { id: 'WS1', region: 'West', poolT1: ['DAL', 'VGK'], poolT2: ['VAN', 'NSH'] },
+    { id: 'WS2', region: 'West', poolT1: ['WPG', 'COL'], poolT2: ['EDM', 'LAK'] },
+  ],
+  r3: [
+    { id: 'EF', region: 'East', poolT1: ['NYR', 'WSH', 'FLA', 'TBL'], poolT2: ['CAR', 'NYI', 'BOS', 'TOR'] },
+    { id: 'WF', region: 'West', poolT1: ['DAL', 'VGK', 'VAN', 'NSH'], poolT2: ['WPG', 'COL', 'EDM', 'LAK'] },
+  ],
+  r4: [
+    { id: 'SCF', region: 'Cup Final', poolT1: EAST_TEAMS, poolT2: WEST_TEAMS },
+  ]
+};
+
+const ALL_MATCHUP_IDS = [
+  ...ROUND_MATCHUPS.r1.map(m => m.id),
+  ...ROUND_MATCHUPS.r2.map(m => m.id),
+  ...ROUND_MATCHUPS.r3.map(m => m.id),
+  ...ROUND_MATCHUPS.r4.map(m => m.id)
 ];
 
-const DEFAULT_PICKS = MOCK_MATCHUPS.reduce((acc, m) => {
-  acc[m.id] = { winner: '', topGoalScorer: '', topPointScorer: '' };
+const DEFAULT_PICKS = ALL_MATCHUP_IDS.reduce((acc, id) => {
+  acc[id] = { winner: '', p1: '', p2: '', topGoalScorer: '', topPointScorer: '' };
   return acc;
 }, {});
 
@@ -261,7 +286,7 @@ function App() {
     const unsubscribe = onSnapshot(chatRef, (snap) => {
       const msgs = [];
       snap.forEach(d => msgs.push({ id: d.id, ...d.data() }));
-      msgs.sort((a, b) => a.timestamp - b.timestamp); // Sort in JS memory to avoid index requirement
+      msgs.sort((a, b) => a.timestamp - b.timestamp); 
       setChatMessages(msgs);
     }, (err) => console.error(err));
     return () => unsubscribe();
@@ -270,13 +295,10 @@ function App() {
   // Watch for new messages and trigger notification
   useEffect(() => {
     if (chatMessages.length > prevMessagesLength.current) {
-      // Only notify if it's NOT the very first initial load (when prev length is 0)
       if (prevMessagesLength.current > 0 && notificationsEnabled) {
         const newMsgs = chatMessages.slice(prevMessagesLength.current);
         newMsgs.forEach(msg => {
-          // Don't notify if I sent it myself
           if (msg.uid !== user?.uid) {
-            // Check if the app is in the background or they are on a different tab inside the app
             if (activeTab !== 'chat' || document.hidden) {
               if ('Notification' in window && Notification.permission === 'granted') {
                 try {
@@ -334,8 +356,25 @@ function App() {
     return () => { isMounted = false; clearInterval(interval); };
   }, []);
 
-  const handleSeriesPick = (id, field, value) => {
-    setMyPicks(prev => ({ ...prev, series: { ...prev.series, [id]: { ...prev.series[id], [field]: value } } }));
+  const handleSeriesPick = (matchupId, field, value) => {
+    setMyPicks(prev => {
+      const updatedSeries = { ...prev.series, [matchupId]: { ...prev.series[matchupId], [field]: value } };
+      
+      // If we just picked a winner in Round 1, suggest it for the Round 2 slot
+      if (field === 'winner') {
+        const r1Match = ROUND_MATCHUPS.r1.find(m => m.id === matchupId);
+        if (r1Match) {
+          // Identify which Round 2 matchup and slot this feeds into
+          const r2Target = ROUND_MATCHUPS.r2.find(m => m.poolT1.includes(r1Match.t1) || m.poolT2.includes(r1Match.t1));
+          if (r2Target) {
+            const slot = r2Target.poolT1.includes(r1Match.t1) ? 'p1' : 'p2';
+            updatedSeries[r2Target.id] = { ...updatedSeries[r2Target.id], [slot]: value };
+          }
+        }
+      }
+
+      return { ...prev, series: updatedSeries };
+    });
   };
 
   const handleSavePicks = async () => {
@@ -543,9 +582,9 @@ function App() {
         </div>
       </nav>
 
-      <main className="flex-1 p-4 md:p-8 pb-24 max-w-6xl mx-auto w-full">
+      <main className="flex-1 p-4 md:p-8 pb-24 max-w-full overflow-x-hidden mx-auto w-full">
         {activeTab === 'dashboard' && (
-          <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in duration-300">
             <div className="flex flex-col sm:flex-row justify-between items-end gap-4">
               <h2 className="text-3xl font-bold">Dashboard</h2>
               <button onClick={handleCopyLink} className="flex items-center gap-2 bg-slate-800 px-4 py-2.5 rounded-lg font-bold border border-slate-700 hover:bg-slate-700 transition-colors">
@@ -580,7 +619,7 @@ function App() {
         )}
 
         {activeTab === 'chat' && (
-          <div className="space-y-4 animate-in fade-in duration-300 flex flex-col h-[calc(100vh-8rem)] md:h-[calc(100vh-4rem)]">
+          <div className="max-w-6xl mx-auto space-y-4 animate-in fade-in duration-300 flex flex-col h-[calc(100vh-8rem)] md:h-[calc(100vh-4rem)]">
             <div className="flex justify-between items-end">
               <h2 className="text-3xl font-bold">Locker Room</h2>
               <button onClick={toggleNotifications} className={`flex items-center gap-2 px-3 py-2 rounded-lg font-bold text-xs transition-colors border ${notificationsEnabled ? 'bg-blue-900/30 text-blue-400 border-blue-500/30 shadow-inner' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200 hover:bg-slate-700 shadow-sm'}`}>
@@ -590,11 +629,8 @@ function App() {
             </div>
             
             <div className="flex-1 bg-slate-900 border border-slate-700 rounded-2xl flex flex-col overflow-hidden shadow-xl relative">
-              
-              {/* Messages Area */}
               <div className="flex-1 p-4 overflow-y-auto space-y-4">
                 {chatMessages.length === 0 && <div className="text-center text-slate-500 mt-10 italic">The locker room is quiet. Start the trash talk!</div>}
-                
                 {chatMessages.map(msg => {
                   const isMe = msg.uid === user?.uid;
                   return (
@@ -610,11 +646,7 @@ function App() {
                 })}
                 <div ref={chatEndRef} />
               </div>
-
-              {/* Input Area */}
               <div className="p-3 bg-slate-800 border-t border-slate-700 flex flex-col gap-2 relative">
-                
-                {/* GIF Drawer */}
                 {showGifs && (
                   <div className="flex gap-2 overflow-x-auto pb-2 mb-2 no-scrollbar animate-in slide-in-from-bottom-2">
                     {MOCK_GIFS.map((gif, idx) => (
@@ -622,86 +654,184 @@ function App() {
                     ))}
                   </div>
                 )}
-
-                {/* Emojis & Controls */}
                 <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar items-center">
-                  <button type="button" onClick={() => setShowGifs(!showGifs)} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${showGifs ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
-                    GIFs
-                  </button>
+                  <button type="button" onClick={() => setShowGifs(!showGifs)} className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${showGifs ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>GIFs</button>
                   <div className="w-px h-4 bg-slate-600 mx-1"></div>
                   {['🏒', '🚨', '🥅', '🍻', '🗑️', '🤡', '🥶', '🔥'].map(emoji => (
-                    <button key={emoji} type="button" onClick={() => setNewMessage(prev => prev + emoji)} className="p-1 hover:bg-slate-700 rounded-lg text-xl transition-transform active:scale-90">
-                      {emoji}
-                    </button>
+                    <button key={emoji} type="button" onClick={() => setNewMessage(prev => prev + emoji)} className="p-1 hover:bg-slate-700 rounded-lg text-xl transition-transform active:scale-90">{emoji}</button>
                   ))}
                 </div>
-
                 <form onSubmit={handleSendMessage} className="flex gap-2">
-                  <input 
-                    type="text" 
-                    value={newMessage} 
-                    onChange={e => setNewMessage(e.target.value)} 
-                    placeholder="Talk some trash or paste an image link..." 
-                    className="flex-1 bg-slate-950 border border-slate-700 text-white rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors"
-                  />
-                  <button type="submit" disabled={!newMessage.trim()} className="bg-blue-600 text-white px-5 rounded-xl font-bold flex items-center justify-center transition-transform active:scale-95 disabled:opacity-50 disabled:active:scale-100 shadow-lg shadow-blue-500/20">
-                    <HockeyIcon name="MessageSquare" />
-                  </button>
+                  <input type="text" value={newMessage} onChange={e => setNewMessage(e.target.value)} placeholder="Talk some trash or paste an image link..." className="flex-1 bg-slate-950 border border-slate-700 text-white rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors"/>
+                  <button type="submit" disabled={!newMessage.trim()} className="bg-blue-600 text-white px-5 rounded-xl font-bold flex items-center justify-center transition-transform active:scale-95 disabled:opacity-50 disabled:active:scale-100 shadow-lg shadow-blue-500/20"><HockeyIcon name="MessageSquare" /></button>
                 </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'mypicks' && (
+          <div className="space-y-6 animate-in fade-in duration-300 pb-12">
+            <div className="max-w-6xl mx-auto flex justify-between items-end px-2">
+              <div>
+                <h2 className="text-3xl font-bold">Playoff Bracket</h2>
+                <p className="text-slate-500 text-xs mt-1">Pick your winners for every round independently.</p>
+              </div>
+              <button onClick={handleSavePicks} className="bg-blue-600 px-6 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-transform active:scale-95 shadow-lg shadow-blue-600/20">{saveSuccess ? <HockeyIcon name="CheckCircle2"/> : 'Save All Picks'}</button>
+            </div>
+
+            {/* Bracket Scroll Area */}
+            <div className="w-full overflow-x-auto no-scrollbar pt-4 flex gap-4 md:gap-12 min-w-max pb-8 px-4">
+              
+              {/* ROUND 1 */}
+              <div className="flex flex-col gap-8 w-56 md:w-64">
+                <div className="text-center font-black text-[10px] text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2">Round 1</div>
+                {ROUND_MATCHUPS.r1.map(m => (
+                  <div key={m.id} className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-slate-700">
+                    <div className="bg-slate-800/50 p-2 border-b border-slate-800 flex justify-between items-center text-[10px] font-bold text-slate-500">
+                      <span>{m.region}</span>
+                      <button onClick={() => handleGenerateAnalysis(m.id, m.t1, m.t2)} className="text-amber-500 uppercase text-[9px] hover:text-amber-400">✨ AI Analysis</button>
+                    </div>
+                    {['t1', 't2'].map(key => {
+                      const team = m[key];
+                      const isWinner = myPicks.series[m.id].winner === team;
+                      return (
+                        <button key={team} onClick={() => handleSeriesPick(m.id, 'winner', team)} className={`w-full flex items-center gap-3 p-3 transition-all ${isWinner ? 'bg-blue-600/20 text-white' : 'hover:bg-slate-800 text-slate-400'}`}>
+                          <img src={getLogo(team)} className="w-6 h-6" alt=""/>
+                          <span className={`text-sm font-bold ${isWinner ? 'text-blue-400' : ''}`}>{team}</span>
+                          {isWinner && <HockeyIcon name="CheckCircle2" className="ml-auto w-4 h-4 text-blue-400" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+
+              {/* ROUND 2 */}
+              <div className="flex flex-col gap-8 w-56 md:w-64 justify-around">
+                <div className="text-center font-black text-[10px] text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2">Conf Semis</div>
+                {ROUND_MATCHUPS.r2.map(m => (
+                  <div key={m.id} className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-blue-900/50">
+                    <div className="bg-slate-800/50 p-2 border-b border-slate-800 text-[10px] font-bold text-slate-500">{m.region} Semis</div>
+                    {['p1', 'p2'].map((field, idx) => {
+                      const pool = idx === 0 ? m.poolT1 : m.poolT2;
+                      const selected = myPicks.series[m.id][field];
+                      const isWinner = myPicks.series[m.id].winner === selected && selected !== '';
+                      return (
+                        <div key={field} className="flex items-center gap-1 p-1 bg-slate-950/20">
+                          <select 
+                            value={selected} 
+                            onChange={(e) => handleSeriesPick(m.id, field, e.target.value)} 
+                            className="flex-1 bg-slate-900 text-xs font-bold p-2 text-slate-300 rounded outline-none border border-slate-800 focus:border-blue-500"
+                          >
+                            <option value="">Select Team...</option>
+                            {pool.map(t => <option key={t} value={t}>{t}</option>)}
+                          </select>
+                          <button 
+                            disabled={!selected}
+                            onClick={() => handleSeriesPick(m.id, 'winner', selected)}
+                            className={`p-2 rounded transition-all ${isWinner ? 'text-blue-400' : 'text-slate-700 hover:text-slate-500'}`}
+                          >
+                            <HockeyIcon name="CheckCircle2" className="w-5 h-5" />
+                          </button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                ))}
+              </div>
+
+              {/* ROUND 3 */}
+              <div className="flex flex-col gap-8 w-56 md:w-64 justify-around">
+                <div className="text-center font-black text-[10px] text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2">Conf Finals</div>
+                {ROUND_MATCHUPS.r3.map(m => (
+                  <div key={m.id} className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-blue-700">
+                    <div className="bg-slate-800/50 p-2 border-b border-slate-800 text-[10px] font-bold text-slate-500">{m.region} Finals</div>
+                    {['p1', 'p2'].map((field, idx) => {
+                      const pool = idx === 0 ? m.poolT1 : m.poolT2;
+                      const selected = myPicks.series[m.id][field];
+                      const isWinner = myPicks.series[m.id].winner === selected && selected !== '';
+                      return (
+                        <div key={field} className="flex items-center gap-1 p-2 bg-slate-950/20">
+                          <select 
+                            value={selected} 
+                            onChange={(e) => handleSeriesPick(m.id, field, e.target.value)} 
+                            className="flex-1 bg-slate-900 text-xs font-bold p-2.5 text-slate-300 rounded outline-none border border-slate-800 focus:border-blue-500"
+                          >
+                            <option value="">Select Team...</option>
+                            {pool.map(t => <option key={t} value={t}>{t}</option>)}
+                          </select>
+                          <button 
+                            disabled={!selected}
+                            onClick={() => handleSeriesPick(m.id, 'winner', selected)}
+                            className={`p-2 rounded transition-all ${isWinner ? 'text-blue-400' : 'text-slate-700 hover:text-slate-500'}`}
+                          >
+                            <HockeyIcon name="CheckCircle2" className="w-6 h-6" />
+                          </button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                ))}
+              </div>
+
+              {/* CUP FINAL */}
+              <div className="flex flex-col w-64 md:w-80 justify-center">
+                <div className="text-center font-black text-[10px] text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2 mb-4">Stanley Cup Final</div>
+                {ROUND_MATCHUPS.r4.map(m => {
+                  const winner = myPicks.series[m.id].winner;
+                  return (
+                    <div key={m.id} className="space-y-4">
+                      <div className="bg-slate-900 border border-blue-600/30 rounded-2xl overflow-hidden shadow-2xl relative">
+                        <div className="bg-slate-800/80 p-3 flex justify-center"><HockeyIcon name="Trophy" className="text-yellow-500 w-10 h-10 animate-pulse"/></div>
+                        {['p1', 'p2'].map((field, idx) => {
+                          const pool = idx === 0 ? m.poolT1 : m.poolT2;
+                          const selected = myPicks.series[m.id][field];
+                          const isWinner = winner === selected && selected !== '';
+                          return (
+                            <div key={field} className="flex items-center gap-3 p-4 bg-slate-950/10 border-b border-slate-800 last:border-0">
+                               <select 
+                                value={selected} 
+                                onChange={(e) => handleSeriesPick(m.id, field, e.target.value)} 
+                                className="flex-1 bg-slate-950 text-base font-black p-3 text-white rounded-lg border border-slate-700 focus:border-yellow-500 outline-none"
+                              >
+                                <option value="">Select Champion...</option>
+                                {pool.map(t => <option key={t} value={t}>{t}</option>)}
+                              </select>
+                              <button 
+                                disabled={!selected}
+                                onClick={() => { 
+                                  handleSeriesPick(m.id, 'winner', selected);
+                                  setMyPicks(prev => ({ ...prev, cupWinner: selected }));
+                                }}
+                                className={`p-3 rounded-full transition-all ${isWinner ? 'bg-yellow-500 text-slate-900' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
+                              >
+                                <HockeyIcon name="Trophy" className="w-6 h-6" />
+                              </button>
+                            </div>
+                          )
+                        })}
+                      </div>
+                      
+                      {winner && (
+                        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-5 text-center animate-in zoom-in duration-500">
+                          <div className="text-[10px] font-black text-yellow-500 uppercase mb-1">Your Predicted 2026 Champion</div>
+                          <div className="text-3xl font-black text-white flex items-center justify-center gap-3">
+                             <img src={getLogo(winner)} className="w-10 h-10 drop-shadow-lg" alt=""/> {winner}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
             </div>
           </div>
         )}
 
-        {activeTab === 'mypicks' && (
-          <div className="space-y-6 animate-in fade-in duration-300">
-            <div className="flex justify-between items-end">
-              <h2 className="text-3xl font-bold">My Picks</h2>
-              <button onClick={handleSavePicks} className="bg-blue-600 px-6 py-2.5 rounded-lg font-bold flex items-center gap-2 transition-transform active:scale-95 shadow-lg shadow-blue-600/20">{saveSuccess ? <HockeyIcon name="CheckCircle2"/> : 'Save Picks'}</button>
-            </div>
-            <div className="bg-slate-900 border border-slate-700 p-6 rounded-2xl shadow-xl">
-              <h3 className="font-bold mb-4 text-slate-300">Stanley Cup Winner Prediction</h3>
-              <select value={myPicks.cupWinner} onChange={(e) => setMyPicks({...myPicks, cupWinner: e.target.value})} className="w-full bg-slate-950 border border-slate-700 p-3 rounded-lg outline-none focus:border-blue-500 transition-colors">
-                <option value="">Select Champion...</option>
-                {TEAMS.map(t => <option key={t} value={t}>{t}</option>)}
-              </select>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {MOCK_MATCHUPS.map(m => {
-                const roster = [...(TEAM_ROSTERS[m.t1] || []), ...(TEAM_ROSTERS[m.t2] || [])];
-                return (
-                <div key={m.id} className="bg-slate-800/50 p-5 rounded-2xl border border-slate-700 shadow-sm hover:border-slate-600 transition-colors">
-                  <div className="flex justify-between items-center mb-4"><span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{m.region} Conference</span><button onClick={() => handleGenerateAnalysis(m.id, m.t1, m.t2)} className="text-xs font-bold text-amber-500 bg-amber-500/10 px-2 py-1 rounded hover:bg-amber-500/20 transition-colors">✨ Analyze</button></div>
-                  {aiAnalysis[m.id]?.text && <div className="mb-4 text-xs text-amber-100/80 italic bg-amber-950/20 p-3 rounded border border-amber-900/30 leading-relaxed shadow-inner">{aiAnalysis[m.id].text}</div>}
-                  <div className="flex gap-2 mb-4">
-                    <button onClick={() => handleSeriesPick(m.id, 'winner', m.t1)} className={`flex-1 p-2.5 rounded-lg font-bold flex items-center justify-center gap-2 transition-all ${myPicks.series[m.id].winner === m.t1 ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-900 text-slate-400 hover:text-slate-200'}`}><img src={getLogo(m.t1)} className="w-5 h-5 shadow-sm" alt=""/> {m.t1}</button>
-                    <button onClick={() => handleSeriesPick(m.id, 'winner', m.t2)} className={`flex-1 p-2.5 rounded-lg font-bold flex items-center justify-center gap-2 transition-all ${myPicks.series[m.id].winner === m.t2 ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-900 text-slate-400 hover:text-slate-200'}`}><img src={getLogo(m.t2)} className="w-5 h-5 shadow-sm" alt=""/> {m.t2}</button>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-1">
-                      <label className="text-[10px] uppercase font-bold text-slate-500 ml-1">Goal Scorer</label>
-                      <select value={myPicks.series[m.id].topGoalScorer} onChange={(e) => handleSeriesPick(m.id, 'topGoalScorer', e.target.value)} className="w-full bg-slate-950 p-2 rounded text-[11px] outline-none border border-slate-800 focus:border-blue-500 transition-colors">
-                        <option value="">Pick Player</option>
-                        {roster.map(p => <option key={`goal-${p.name}`} value={p.name}>{p.name}</option>)}
-                      </select>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] uppercase font-bold text-slate-500 ml-1">Points Scorer</label>
-                      <select value={myPicks.series[m.id].topPointScorer} onChange={(e) => handleSeriesPick(m.id, 'topPointScorer', e.target.value)} className="w-full bg-slate-950 p-2 rounded text-[11px] outline-none border border-slate-800 focus:border-blue-500 transition-colors">
-                        <option value="">Pick Player</option>
-                        {roster.map(p => <option key={`pts-${p.name}`} value={p.name}>{p.name}</option>)}
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              )})}
-            </div>
-          </div>
-        )}
-
         {activeTab === 'leaderboard' && (
-          <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in duration-300">
             <h2 className="text-3xl font-bold">Leaderboard</h2>
             <div className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-2xl">
               <table className="w-full text-left border-collapse">
@@ -732,10 +862,8 @@ function App() {
         )}
 
         {activeTab === 'manage' && (
-          <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in duration-300">
             <h2 className="text-3xl font-bold">Settings</h2>
-
-            {/* Always visible to the user: Change Name */}
             <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg">
               <h3 className="font-bold mb-4 flex items-center gap-2 text-slate-200"><HockeyIcon name="Edit3" className="text-blue-400"/> Change My Name</h3>
               <div className="flex flex-col sm:flex-row gap-2">
@@ -743,8 +871,6 @@ function App() {
                 <button onClick={() => { if(updateNameInput.trim()) { handleUpdateParticipant(myParticipantId, 'name', updateNameInput.trim()); setSaveSuccess(true); setTimeout(() => setSaveSuccess(false), 3000); } }} className="bg-blue-600 px-6 py-3 sm:py-0 font-bold rounded-lg hover:bg-blue-500 transition-colors active:scale-95 shadow-lg flex justify-center items-center gap-2">{saveSuccess ? <HockeyIcon name="CheckCircle2"/> : 'Save'}</button>
               </div>
             </div>
-
-            {/* Admin Zone Lock/Unlock */}
             <div className="pt-4 border-t border-slate-800/80">
               {!isAdmin ? (
                 <div className="bg-slate-800/30 p-6 rounded-2xl border border-slate-700/50 flex flex-col sm:flex-row gap-4 items-center justify-between">
@@ -753,14 +879,7 @@ function App() {
                     <p className="text-xs text-slate-500 mt-1">Enter PIN to manage participants and pool points.</p>
                   </div>
                   <div className="flex gap-2 w-full sm:w-auto">
-                    <input 
-                      type="password" 
-                      placeholder="Admin PIN" 
-                      value={adminPasswordInput} 
-                      onChange={(e) => setAdminPasswordInput(e.target.value)} 
-                      onKeyDown={(e) => { if(e.key === 'Enter' && adminPasswordInput === 'admin') { setIsAdmin(true); setAdminPasswordInput(''); } }}
-                      className="bg-slate-950 p-2.5 rounded-lg border border-slate-700 text-white outline-none focus:border-amber-500 w-full sm:w-32" 
-                    />
+                    <input type="password" placeholder="Admin PIN" value={adminPasswordInput} onChange={(e) => setAdminPasswordInput(e.target.value)} onKeyDown={(e) => { if(e.key === 'Enter' && adminPasswordInput === 'admin') { setIsAdmin(true); setAdminPasswordInput(''); } }} className="bg-slate-950 p-2.5 rounded-lg border border-slate-700 text-white outline-none focus:border-amber-500 w-full sm:w-32"/>
                     <button onClick={() => { if(adminPasswordInput === 'admin') { setIsAdmin(true); setAdminPasswordInput(''); } }} className="bg-slate-700 hover:bg-slate-600 px-4 py-2.5 rounded-lg font-bold transition-colors text-sm">Unlock</button>
                   </div>
                 </div>
@@ -770,7 +889,6 @@ function App() {
                     <h3 className="text-lg font-bold text-amber-500 flex items-center gap-2"><HockeyIcon name="AlertCircle" /> Admin Zone Unlocked</h3>
                     <button onClick={() => setIsAdmin(false)} className="text-xs bg-slate-800 px-4 py-2 rounded-lg hover:bg-slate-700 text-slate-300 font-bold transition-colors">Lock Zone</button>
                   </div>
-
                   <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg">
                     <h3 className="font-bold mb-4 flex items-center gap-2 text-slate-200"><HockeyIcon name="Users" className="text-blue-400"/> Add Participant (Manual Entry)</h3>
                     <div className="flex gap-2">
@@ -778,7 +896,6 @@ function App() {
                       <button onClick={handleAddParticipant} className="bg-blue-600 px-6 font-bold rounded-lg hover:bg-blue-500 transition-colors active:scale-95 shadow-lg">Add</button>
                     </div>
                   </div>
-                  
                   <div className="bg-slate-800 rounded-2xl border border-slate-700 overflow-x-auto shadow-xl">
                     <table className="w-full text-left min-w-[600px] border-collapse"><tbody className="divide-y divide-slate-700">
                       {participants.map(p => (
@@ -809,7 +926,6 @@ function App() {
                 </div>
               )}
             </div>
-
           </div>
         )}
       </main>
