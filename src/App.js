@@ -712,7 +712,7 @@ function App() {
 
                 {/* ROUND 2 */}
                 <div className="flex flex-col gap-8 w-56 md:w-64 justify-around shrink-0">
-                  <div className="text-center font-black text-[10px] text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2">Conf Semis</div>
+                  <div className="text-center font-black text-[10px] text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2">Round 2</div>
                   {ROUND_MATCHUPS.r2.map(m => (
                     <div key={m.id} className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-blue-900/50">
                       <div className="bg-slate-800/50 p-2 border-b border-slate-800 text-[10px] font-bold text-slate-500">{m.region} Semis</div>
@@ -744,9 +744,9 @@ function App() {
                   ))}
                 </div>
 
-                {/* ROUND 3 */}
+                {/* CONFERENCE FINALS (ROUND 3) */}
                 <div className="flex flex-col gap-8 w-56 md:w-64 justify-around shrink-0">
-                  <div className="text-center font-black text-[10px] text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2">Conf Finals</div>
+                  <div className="text-center font-black text-[10px] text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2">Conference Finals</div>
                   {ROUND_MATCHUPS.r3.map(m => (
                     <div key={m.id} className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-blue-700">
                       <div className="bg-slate-800/50 p-2 border-b border-slate-800 text-[10px] font-bold text-slate-500">{m.region} Finals</div>
